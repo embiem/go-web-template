@@ -4,12 +4,17 @@ This is my (embiem's) favorite Go web stack at the time of making.
 
 I use this to start new web projects quickly and will likely change this template over time.
 
+## Note on Security
+
+The simple password auth in this template is just to get going and should be replaced with a more secure approach or additional best practices, before going to production. Always reference the [OWASP Top 10](https://owasp.org/www-project-top-ten/) list to ensure you're building a secure app.
+
 ## Prerequisites
 
 - install Go
 - install [migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
 - install [sqlc](https://docs.sqlc.dev/en/stable/overview/install.html)
 - install [air](https://github.com/air-verse/air#installation)
+- install [templ](https://templ.guide/quick-start/installation)
 - install [tailwindcss-cli](https://tailwindcss.com/blog/standalone-cli) v3.4.10
 - `cp .env.example .env` & fill-in any missing env vars
 - spin-up local dev services like db: `docker compose up -d`
