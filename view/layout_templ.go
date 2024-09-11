@@ -26,7 +26,7 @@ func Layout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-theme=\"dark\"><head><title>Go LLM Test</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/favicon.ico\"><link rel=\"apple-touch-icon\" href=\"/public/apple-touch-icon.png\"><link rel=\"manifest\" href=\"/public/site.webmanifest\"><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/public/output.css\"><script src=\"https://unpkg.com/htmx.org@2.0.1\" defer></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js\" defer></script></head><body class=\"antialiased bg-white min-h-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 prose\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-theme=\"dark\"><head><title>embiem's Go Web Template</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/public/favicon.ico\"><link rel=\"apple-touch-icon\" href=\"/public/apple-touch-icon.png\"><link rel=\"manifest\" href=\"/public/site.webmanifest\"><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/public/output.css\"><script src=\"https://unpkg.com/htmx.org@2.0.1\" defer></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.1/sse.js\" defer></script></head><body class=\"antialiased bg-white min-h-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 prose\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
