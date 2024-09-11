@@ -1,0 +1,92 @@
+package view
+
+
+type SignupInputErrors struct {
+PreviousName string
+EmptyName bool
+EmptyPassword bool
+UsernameTaken bool
+}
+
+templ SignupPage() {
+@Layout() {
+<div>
+    <h1>Signup</h1>
+    @SignupForm(SignupInputErrors{})
+</div>
+}
+}
+
+templ SignupForm(errors SignupInputErrors) {
+<form hx-post="/signup" hx-swap="outerHTML">
+    <input name="username" type="text" placeholder="Your username" value={errors.PreviousName} />
+    if errors.EmptyName {
+    <div style="font-color:red;">Please enter a username!</div>
+    }
+    if errors.UsernameTaken {
+    <div style="font-color:red;">This username is unavailable!</div>
+    }
+
+    <input name="password" type="password" placeholder="Your pasword" />
+    if errors.EmptyPassword {
+    <div style="font-color:red;">Please enter a password!</div>
+    }
+
+    <div class="hidden">
+        <input name="organization" type="text" placeholder="Your organization" />
+    </div>
+
+    @Button(ButtonProps{Type: "submit"}) { Signup }
+</form>
+}
+
+
+type LoginInputErrors struct {
+PreviousName string
+EmptyName bool
+EmptyPassword bool
+UnknownName bool
+IncorrectPassword bool
+}
+
+templ LoginPage() {
+@Layout() {
+<div>
+    <h1>Login</h1>
+    <p>Don't have an account yet? <a href="/signup">Sign-up!</a></p>
+    @LoginForm(LoginInputErrors{})
+</div>
+}
+}
+
+templ LoginForm(errors LoginInputErrors) {
+<form hx-post="/login" hx-swap="outerHTML">
+    <input name="username" type="text" placeholder="Your username" value={errors.PreviousName} />
+    if errors.EmptyName {
+    <div style="font-color:red;">Please enter your username!</div>
+    }
+    if errors.UnknownName {
+    <div style="font-color:red;">This username doesn't exist!</div>
+    }
+
+    <input name="password" type="password" placeholder="Your pasword" />
+    if errors.EmptyPassword {
+    <div style="font-color:red;">Please enter your password!</div>
+    }
+    if errors.IncorrectPassword {
+    <div style="font-color:red;">Incorrect password!</div>
+    }
+
+    <div class="hidden bg-red-500">
+        <input name="organization" type="text" placeholder="Your organization" />
+    </div>
+
+    @Button(ButtonProps{Type: "submit"}) { Login }
+</form>
+}
+
+templ LogoutForm() {
+<form action="/logout" method="post">
+    @Button(ButtonProps{Type: "submit"}) { Logout }
+</form>
+}
