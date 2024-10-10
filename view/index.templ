@@ -1,12 +1,10 @@
 package view
 
-
 templ IndexPage(username string) {
-@Layout() {
-<div>
-	<h1>Hi {username}!</h1>
-	@LogoutForm()
-	
-</div>
-}
+	@Layout() {
+		<div>
+			<h1>Hi { username }!</h1>
+			@LogoutForm()
+		</div>
+	}
 }
