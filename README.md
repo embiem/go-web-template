@@ -84,3 +84,17 @@ Write the SQL queries & mutations in `db/query.sql` and then run `sqlc generate`
 Using Templ: [https://templ.guide/quick-start/creating-a-simple-templ-component](https://templ.guide/quick-start/creating-a-simple-templ-component)
 
 - `templ generate` to generate go files after adding or editing .templ files
+
+## Optimizations
+
+Here is a list of tips to optimize the loading times.
+
+1. Only include the JS that's needed. If a page doesn't need any JS, don't include it.
+2. Include any external JS scripts with the `defer` attribute.
+3. Preload pages e.g. on hover via [htmx preload extension](https://htmx.org/extensions/preload/)
+4. Use a CDN to serve assets & ideally pre-rendered HTML pages as well
+5. Cache assets as well as pages as much as possible
+6. Add links to needed assets like images or fonts with a `rel="preload"` attribute to the head.
+7. Add links to other domains like your CDN with a `rel="dns-prefetch"` attribute to the head.
+8. Defer non-critical CSS ([web.dev guide](https://web.dev/articles/defer-non-critical-css#optimize)): Include all necessary CSS for a page in the HTML on first load. Defer the load of the general CSS file that covers other pages/non-critical css.
+9. Make use of [image sprites](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_images/Implementing_image_sprites_in_CSS), e.g. if loading many thumbnails of same size, to reduce amount of requests & re-renders.
