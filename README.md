@@ -12,15 +12,15 @@ The simple password auth in this template is just to get going and should be rep
 
 - install Go (version 1.23.1)
 - install [migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
-  - example... check releases page: `curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz`
+  - example... check releases page: `curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar xvz`
 - install [sqlc](https://docs.sqlc.dev/en/stable/overview/install.html)
   - `go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`
 - install [air](https://github.com/air-verse/air#installation)
   - `go install github.com/air-verse/air@latest`
 - install [templ](https://templ.guide/quick-start/installation)
   - `go install github.com/a-h/templ/cmd/templ@latest`
-- install [tailwindcss-cli](https://tailwindcss.com/blog/standalone-cli) v3.4.10
-  - example... check releases page: `curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 && chmod +x tailwindcss-linux-x64 && mv tailwindcss-linux-x64 tailwindcss`
+- install [tailwindcss-cli](https://tailwindcss.com/blog/standalone-cli) v4.1.11
+  - example... check releases page: `curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.11/tailwindcss-linux-x64 && chmod +x tailwindcss-linux-x64 && mv tailwindcss-linux-x64 tailwindcss`
 - `cp .env.example .env` & fill-in any missing env vars
 - spin-up local dev services like db: `docker compose up -d`
 
