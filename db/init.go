@@ -1,3 +1,6 @@
+/*
+Package db sets up the database connection & queries.
+*/
 package db
 
 import (
@@ -15,9 +18,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-var Queries *data.Queries
-var Pool *pgxpool.Pool
-var Conn *pgxpool.Conn
+var (
+	Queries *data.Queries
+	Pool    *pgxpool.Pool
+	Conn    *pgxpool.Conn
+)
 
 func Init() error {
 	if Queries != nil {

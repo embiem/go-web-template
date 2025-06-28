@@ -1,3 +1,7 @@
+/*
+Package util contains utility functions.
+Like markdown rendering & logging.
+*/
 package util
 
 import (

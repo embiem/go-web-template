@@ -1,3 +1,6 @@
+/*
+Package handler contains the logic for the routes.
+*/
 package handler
 
 import (
