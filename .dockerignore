@@ -1,0 +1,7 @@
+tmp/
+.git
+.env
+.env.*
+!.env.example
+*.md
+.air.toml
