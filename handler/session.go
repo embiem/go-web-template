@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/gob"
+	"net/http"
 	"time"
 
 	"github.com/embiem/go-web-template/data"
@@ -13,7 +14,7 @@ import (
 
 var SessionManager *scs.SessionManager
 
-func InitSession() {
+func InitSession(secureCookies bool) {
 	// Register structs we want to set on the session
 	gob.Register(data.User{})
 
@@ -21,4 +22,10 @@ func InitSession() {
 	SessionManager = scs.New()
 	SessionManager.Store = pgxstore.New(db.Pool)
 	SessionManager.Lifetime = 24 * time.Hour
+
+	// Harden the session cookie.
+	SessionManager.Cookie.HttpOnly = true
+	SessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	SessionManager.Cookie.Path = "/"
+	SessionManager.Cookie.Secure = secureCookies
 }
