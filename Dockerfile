@@ -1,26 +1,34 @@
-FROM golang:1.23-alpine as golang
+FROM golang:1.25-alpine AS build
 
 WORKDIR /app
+
+# Download modules first for better layer caching
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
-RUN go mod verify
-
 # Download tailwindcss cli https://tailwindcss.com/blog/standalone-cli
-RUN apk --no-cache add curl
-RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.10/tailwindcss-linux-x64
-RUN chmod +x tailwindcss-linux-x64
-RUN mv tailwindcss-linux-x64 tailwindcss
+RUN apk --no-cache add curl libstdc++ libgcc
+RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.11/tailwindcss-linux-x64-musl
+RUN chmod +x tailwindcss-linux-x64-musl
+RUN mv tailwindcss-linux-x64-musl tailwindcss
 RUN ./tailwindcss -i input.css -o public/output.css --minify
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /server .
 
-FROM alpine
+FROM alpine:3.20
 
-COPY --from=golang /server .
-COPY --from=golang /app/public ./public
-COPY --from=golang /app/db/migrations ./db/migrations
+RUN adduser -D -u 10001 appuser
+
+COPY --from=build /server /server
+COPY --from=build /app/public ./public
+COPY --from=build /app/db/migrations ./db/migrations
+
+USER appuser
 
 EXPOSE 3000
+
+HEALTHCHECK CMD wget -qO- http://localhost:3000/healthz || exit 1
 
 CMD ["/server"]
