@@ -98,6 +98,9 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 	}
 	// ~~~ END OF TX
 
+	if err := SessionManager.RenewToken(r.Context()); err != nil {
+		return err
+	}
 	SessionManager.Put(r.Context(), string(SessionKeyUser), user)
 
 	// Redirect to index page
@@ -180,6 +183,9 @@ func PostLogin(w http.ResponseWriter, r *http.Request) error {
 		}).Render(r.Context(), w)
 	}
 
+	if err := SessionManager.RenewToken(r.Context()); err != nil {
+		return err
+	}
 	SessionManager.Put(r.Context(), string(SessionKeyUser), user)
 
 	// Redirect to index page
