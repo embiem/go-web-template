@@ -66,7 +66,7 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	tx, err := db.Conn.Begin(r.Context())
+	tx, err := db.Pool.Begin(r.Context())
 	if err != nil {
 		return err
 	}
