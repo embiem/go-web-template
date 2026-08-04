@@ -20,14 +20,14 @@ templ SignupForm(errors SignupInputErrors) {
 	<form hx-post="/signup" hx-swap="outerHTML">
 		<input name="username" type="text" placeholder="Your username" value={ errors.PreviousName }/>
 		if errors.EmptyName {
-			<div style="font-color:red;">Please enter a username!</div>
+			<div class="text-red-500">Please enter a username!</div>
 		}
 		if errors.UsernameTaken {
-			<div style="font-color:red;">This username is unavailable!</div>
+			<div class="text-red-500">This username is unavailable!</div>
 		}
-		<input name="password" type="password" placeholder="Your pasword"/>
+		<input name="password" type="password" placeholder="Your password"/>
 		if errors.EmptyPassword {
-			<div style="font-color:red;">Please enter a password!</div>
+			<div class="text-red-500">Please enter a password!</div>
 		}
 		<div class="hidden">
 			<input name="organization" type="text" placeholder="Your organization"/>
@@ -60,19 +60,19 @@ templ LoginForm(errors LoginInputErrors) {
 	<form hx-post="/login" hx-swap="outerHTML">
 		<input name="username" type="text" placeholder="Your username" value={ errors.PreviousName }/>
 		if errors.EmptyName {
-			<div style="font-color:red;">Please enter your username!</div>
+			<div class="text-red-500">Please enter your username!</div>
 		}
 		if errors.UnknownName {
-			<div style="font-color:red;">This username doesn't exist!</div>
+			<div class="text-red-500">This username doesn't exist!</div>
 		}
-		<input name="password" type="password" placeholder="Your pasword"/>
+		<input name="password" type="password" placeholder="Your password"/>
 		if errors.EmptyPassword {
-			<div style="font-color:red;">Please enter your password!</div>
+			<div class="text-red-500">Please enter your password!</div>
 		}
 		if errors.IncorrectPassword {
-			<div style="font-color:red;">Incorrect password!</div>
+			<div class="text-red-500">Incorrect password!</div>
 		}
-		<div class="hidden bg-red-500">
+		<div class="hidden">
 			<input name="organization" type="text" placeholder="Your organization"/>
 		</div>
 		@Button(ButtonProps{Type: "submit"}) {
