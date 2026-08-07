@@ -6,17 +6,16 @@ package handler
 import (
 	"net/http"
 
-	"github.com/embiem/go-web-template/data"
 	"github.com/embiem/go-web-template/view"
 )
 
 func GetIndexPage(w http.ResponseWriter, r *http.Request) error {
-	if !SessionManager.Exists(r.Context(), string(SessionKeyUser)) {
+	user, ok := CurrentUser(r)
+	if !ok {
 		// Redirect to login page
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return nil
 	}
-	user := SessionManager.Get(r.Context(), string(SessionKeyUser)).(data.User)
 
 	return view.IndexPage(user.Username).Render(r.Context(), w)
 }
