@@ -2,9 +2,8 @@ package view
 
 type SignupInputErrors struct {
 	PreviousName  string
-	EmptyName     bool
-	EmptyPassword bool
-	UsernameTaken bool
+	NameError     string
+	PasswordError string
 }
 
 templ SignupPage() {
@@ -18,19 +17,32 @@ templ SignupPage() {
 
 templ SignupForm(errors SignupInputErrors) {
 	<form hx-post="/signup" hx-swap="outerHTML">
-		<input name="username" type="text" placeholder="Your username" value={ errors.PreviousName }/>
-		if errors.EmptyName {
-			<div class="text-red-500">Please enter a username!</div>
+		<input
+			name="username"
+			type="text"
+			placeholder="Your username"
+			value={ errors.PreviousName }
+			autocomplete="username"
+			maxlength="64"
+			required
+		/>
+		if errors.NameError != "" {
+			<div class="text-red-500">{ errors.NameError }</div>
 		}
-		if errors.UsernameTaken {
-			<div class="text-red-500">This username is unavailable!</div>
-		}
-		<input name="password" type="password" placeholder="Your password"/>
-		if errors.EmptyPassword {
-			<div class="text-red-500">Please enter a password!</div>
+		<input
+			name="password"
+			type="password"
+			placeholder="Your password"
+			autocomplete="new-password"
+			minlength="8"
+			maxlength="72"
+			required
+		/>
+		if errors.PasswordError != "" {
+			<div class="text-red-500">{ errors.PasswordError }</div>
 		}
 		<div class="hidden">
-			<input name="organization" type="text" placeholder="Your organization"/>
+			<input name="organization" type="text" placeholder="Your organization" tabindex="-1" autocomplete="off"/>
 		</div>
 		@Button(ButtonProps{Type: "submit"}) {
 			Signup 
@@ -39,11 +51,12 @@ templ SignupForm(errors SignupInputErrors) {
 }
 
 type LoginInputErrors struct {
-	PreviousName      string
-	EmptyName         bool
-	EmptyPassword     bool
-	UnknownName       bool
-	IncorrectPassword bool
+	PreviousName  string
+	NameError     string
+	PasswordError string
+	// FormError is the deliberately generic credential failure: telling the
+	// user which half was wrong is a username oracle.
+	FormError string
 }
 
 templ LoginPage() {
@@ -58,22 +71,34 @@ templ LoginPage() {
 
 templ LoginForm(errors LoginInputErrors) {
 	<form hx-post="/login" hx-swap="outerHTML">
-		<input name="username" type="text" placeholder="Your username" value={ errors.PreviousName }/>
-		if errors.EmptyName {
-			<div class="text-red-500">Please enter your username!</div>
+		<input
+			name="username"
+			type="text"
+			placeholder="Your username"
+			value={ errors.PreviousName }
+			autocomplete="username"
+			maxlength="64"
+			required
+		/>
+		if errors.NameError != "" {
+			<div class="text-red-500">{ errors.NameError }</div>
 		}
-		if errors.UnknownName {
-			<div class="text-red-500">This username doesn't exist!</div>
+		<input
+			name="password"
+			type="password"
+			placeholder="Your password"
+			autocomplete="current-password"
+			maxlength="72"
+			required
+		/>
+		if errors.PasswordError != "" {
+			<div class="text-red-500">{ errors.PasswordError }</div>
 		}
-		<input name="password" type="password" placeholder="Your password"/>
-		if errors.EmptyPassword {
-			<div class="text-red-500">Please enter your password!</div>
-		}
-		if errors.IncorrectPassword {
-			<div class="text-red-500">Incorrect password!</div>
+		if errors.FormError != "" {
+			<div class="text-red-500">{ errors.FormError }</div>
 		}
 		<div class="hidden">
-			<input name="organization" type="text" placeholder="Your organization"/>
+			<input name="organization" type="text" placeholder="Your organization" tabindex="-1" autocomplete="off"/>
 		</div>
 		@Button(ButtonProps{Type: "submit"}) {
 			Login 

@@ -3,22 +3,40 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
+	"regexp"
+	"unicode/utf8"
 
 	"github.com/embiem/go-web-template/data"
 	"github.com/embiem/go-web-template/db"
 	"github.com/embiem/go-web-template/view"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	// MinPasswordLen follows NIST SP 800-63B: length is the only rule.
+	MinPasswordLen = 8
+	// MaxPasswordLen is bcrypt's hard limit; it silently ignores anything
+	// past 72 bytes, so reject instead of truncating.
+	MaxPasswordLen = 72
+	MaxUsernameLen = 64
+)
+
+// usernameRe caps length and charset so nothing unexpected reaches the DB and
+// look-alike names can't be registered.
+var usernameRe = regexp.MustCompile(`^[a-zA-Z0-9._-]{1,64}$`)
+
+// dummyHash is compared against when no password account matched, so a login
+// attempt costs the same whether or not the username exists. Generated with
+// bcrypt.GenerateFromPassword at bcrypt.DefaultCost.
+var dummyHash = []byte("$2a$10$e5nDnGctj0BfDp5OKrlngO2cha.gAZ2GvkWoafbw/kidhqmTvOES.")
+
 func GetSignupPage(w http.ResponseWriter, r *http.Request) error {
 	if SessionManager.Exists(r.Context(), string(SessionKeyUser)) {
-		slog.Info("User already logged in", "user",
-			SessionManager.Get(r.Context(), string(SessionKeyUser)))
 		// Redirect to index page
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return nil
@@ -32,9 +50,7 @@ func GetSignupPage(w http.ResponseWriter, r *http.Request) error {
 }
 
 func PostSignup(w http.ResponseWriter, r *http.Request) error {
-
-	organization := r.FormValue("organization")
-	if organization != "" {
+	if r.FormValue("organization") != "" {
 		// Honeypot field detected a spam bot
 		w.WriteHeader(http.StatusForbidden)
 		return nil
@@ -43,26 +59,17 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	if username == "" || password == "" {
-		return view.SignupForm(
-			view.SignupInputErrors{
-				PreviousName:  username,
-				EmptyName:     username == "",
-				EmptyPassword: password == "",
-			}).Render(r.Context(), w)
-	}
-
-	_, err := db.Queries.GetUserByUsername(r.Context(), username)
-	if err == nil {
+	nameErr, passwordErr := validateCredentials(username, password)
+	if nameErr != "" || passwordErr != "" {
 		return view.SignupForm(view.SignupInputErrors{
 			PreviousName:  username,
-			UsernameTaken: true,
+			NameError:     nameErr,
+			PasswordError: passwordErr,
 		}).Render(r.Context(), w)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		slog.Error("Error while hashing password", "err", err)
 		return err
 	}
 
@@ -78,7 +85,14 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 		Username: username,
 	})
 	if err != nil {
-		slog.Error("Error while creating user", "err", err)
+		// The unique index on LOWER(username) is the only thing that can
+		// decide this race; an application-level pre-check cannot.
+		if isUniqueViolation(err) {
+			return view.SignupForm(view.SignupInputErrors{
+				PreviousName: username,
+				NameError:    "This username is unavailable!",
+			}).Render(r.Context(), w)
+		}
 		return err
 	}
 
@@ -88,7 +102,6 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 		PasswordHash: pgtype.Text{String: string(hashedPassword), Valid: true},
 	})
 	if err != nil {
-		slog.Error("Error while creating account", "err", err)
 		return err
 	}
 
@@ -101,7 +114,7 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 	if err := SessionManager.RenewToken(r.Context()); err != nil {
 		return err
 	}
-	SessionManager.Put(r.Context(), string(SessionKeyUser), user)
+	SessionManager.Put(r.Context(), string(SessionKeyUser), user.ID)
 
 	// Redirect to index page
 	w.Header().Add("HX-Redirect", "/")
@@ -111,8 +124,6 @@ func PostSignup(w http.ResponseWriter, r *http.Request) error {
 
 func GetLoginPage(w http.ResponseWriter, r *http.Request) error {
 	if SessionManager.Exists(r.Context(), string(SessionKeyUser)) {
-		slog.Info("User already logged in", "user",
-			SessionManager.Get(r.Context(), string(SessionKeyUser)))
 		// Redirect to index page
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return nil
@@ -126,8 +137,7 @@ func GetLoginPage(w http.ResponseWriter, r *http.Request) error {
 }
 
 func PostLogin(w http.ResponseWriter, r *http.Request) error {
-	organization := r.FormValue("organization")
-	if organization != "" {
+	if r.FormValue("organization") != "" {
 		// Honeypot field detected a spam bot
 		w.WriteHeader(http.StatusForbidden)
 		return nil
@@ -137,56 +147,48 @@ func PostLogin(w http.ResponseWriter, r *http.Request) error {
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
-		return view.LoginForm(
-			view.LoginInputErrors{
-				PreviousName:  username,
-				EmptyName:     username == "",
-				EmptyPassword: password == "",
-			}).Render(r.Context(), w)
-	}
-
-	user, err := db.Queries.GetUserByUsername(r.Context(), username)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return view.LoginForm(view.LoginInputErrors{
-				PreviousName: username,
-				UnknownName:  true,
-			}).Render(r.Context(), w)
-		}
-
-		return err
-	}
-	accounts, err := db.Queries.GetUserAccounts(r.Context(), user.ID)
-	if err != nil {
-		return err
-	}
-	if len(accounts) == 0 {
-		return fmt.Errorf("no accounts found for user %s", user.Username)
-	}
-	var passwordAccount data.Account
-	for _, account := range accounts {
-		if account.Provider == "password" {
-			passwordAccount = account
-			break
-		}
-	}
-	if !passwordAccount.ID.Valid {
-		return fmt.Errorf("no account of correct provider found for user %s", user.Username)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(
-		[]byte(passwordAccount.PasswordHash.String),
-		[]byte(password)); err != nil {
 		return view.LoginForm(view.LoginInputErrors{
-			PreviousName:      username,
-			IncorrectPassword: true,
+			PreviousName:  username,
+			NameError:     msgIf(username == "", "Please enter your username!"),
+			PasswordError: msgIf(password == "", "Please enter your password!"),
+		}).Render(r.Context(), w)
+	}
+
+	// Look up the password account, but always run bcrypt afterwards - against
+	// a dummy hash when there is none - so response time doesn't reveal which
+	// usernames exist.
+	hash := dummyHash
+	var user data.User
+	found := false
+
+	if u, err := db.Queries.GetUserByUsername(r.Context(), username); err == nil {
+		accounts, err := db.Queries.GetUserAccounts(r.Context(), u.ID)
+		if err != nil {
+			return err
+		}
+		for _, account := range accounts {
+			if account.Provider == string(PasswordProvider) && account.PasswordHash.Valid {
+				user, hash, found = u, []byte(account.PasswordHash.String), true
+				break
+			}
+		}
+	} else if !errors.Is(err, pgx.ErrNoRows) {
+		return err
+	}
+
+	// Unknown user, no password account (e.g. OAuth-only) and wrong password
+	// all render the same message; anything else is an enumeration oracle.
+	if err := bcrypt.CompareHashAndPassword(hash, []byte(password)); err != nil || !found {
+		return view.LoginForm(view.LoginInputErrors{
+			PreviousName: username,
+			FormError:    "Invalid username or password.",
 		}).Render(r.Context(), w)
 	}
 
 	if err := SessionManager.RenewToken(r.Context()); err != nil {
 		return err
 	}
-	SessionManager.Put(r.Context(), string(SessionKeyUser), user)
+	SessionManager.Put(r.Context(), string(SessionKeyUser), user.ID)
 
 	// Redirect to index page
 	w.Header().Add("HX-Redirect", "/")
@@ -195,9 +197,48 @@ func PostLogin(w http.ResponseWriter, r *http.Request) error {
 }
 
 func PostLogout(w http.ResponseWriter, r *http.Request) error {
-	SessionManager.Remove(r.Context(), string(SessionKeyUser))
+	// Destroy, not Remove: the token and its DB row must die with the logout,
+	// otherwise a stolen cookie stays valid for the rest of the lifetime.
+	if err := SessionManager.Destroy(r.Context()); err != nil {
+		return err
+	}
 
 	// Redirect to login page
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 	return nil
+}
+
+// validateCredentials returns a message per field, empty when the field is fine.
+func validateCredentials(username, password string) (nameErr, passwordErr string) {
+	switch {
+	case username == "":
+		nameErr = "Please enter a username!"
+	case !usernameRe.MatchString(username):
+		nameErr = fmt.Sprintf(
+			"Username may only contain letters, digits, '.', '_' and '-', and be at most %d characters.",
+			MaxUsernameLen)
+	}
+
+	switch {
+	case password == "":
+		passwordErr = "Please enter a password!"
+	case utf8.RuneCountInString(password) < MinPasswordLen:
+		passwordErr = fmt.Sprintf("Password must be at least %d characters.", MinPasswordLen)
+	case len(password) > MaxPasswordLen:
+		passwordErr = fmt.Sprintf("Password must be at most %d bytes.", MaxPasswordLen)
+	}
+
+	return nameErr, passwordErr
+}
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
+
+func msgIf(cond bool, msg string) string {
+	if cond {
+		return msg
+	}
+	return ""
 }
