@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,13 +16,32 @@ import (
 	"github.com/embiem/go-web-template/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 
 	"github.com/joho/godotenv"
 )
 
+// keyByIP buckets rate limits per client address; middleware.RealIP has
+// already resolved r.RemoteAddr from the proxy headers.
+func keyByIP(r *http.Request) (string, error) {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		host = r.RemoteAddr
+	}
+	return httprate.CanonicalizeIP(host), nil
+}
+
+// keyByUsername buckets rate limits per account. Parsing the form here is
+// free: the handler reads it back from the cached r.PostForm.
+func keyByUsername(r *http.Request) (string, error) {
+	return strings.ToLower(r.FormValue("username")), nil
+}
+
 func main() {
 	initialize()
 	defer teardown()
+
+	isProd := getenv("APP_ENV", "development") == "production"
 
 	// Setup Chi router
 	router := chi.NewRouter()
@@ -34,15 +54,25 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Compress(5))
 	router.Use(middleware.Timeout(30 * time.Second))
+	router.Use(util.SecurityHeaders(isProd))
+	router.Use(util.SameOriginOnly)
 
 	router.Get("/", handler.Make(handler.GetIndexPage))
 
 	// Auth Routes
 	router.Get("/signup", handler.Make(handler.GetSignupPage))
-	router.Post("/signup", handler.Make(handler.PostSignup))
-
 	router.Get("/login", handler.Make(handler.GetLoginPage))
-	router.Post("/login", handler.Make(handler.PostLogin))
+
+	// Throttle credential submission per IP, and per account so that
+	// credential stuffing spread across many IPs still hits a wall. The
+	// per-account budget stays generous enough that an attacker can't lock a
+	// victim out by burning it.
+	router.Group(func(r chi.Router) {
+		r.Use(httprate.LimitBy(20, time.Minute, keyByIP))
+		r.Use(httprate.LimitBy(10, time.Minute, keyByUsername))
+		r.Post("/signup", handler.Make(handler.PostSignup))
+		r.Post("/login", handler.Make(handler.PostLogin))
+	})
 
 	router.Post("/logout", handler.Make(handler.PostLogout))
 
