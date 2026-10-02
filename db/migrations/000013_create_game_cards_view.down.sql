@@ -1,0 +1,5 @@
+BEGIN;
+
+DROP VIEW IF EXISTS game_cards;
+
+COMMIT;

@@ -1,0 +1,44 @@
+package view
+
+templ RadarPage(d RadarPageData) {
+	@Layout(d.Meta) {
+		<section class="container-site pt-12 sm:pt-16">
+			<p class="text-xs font-semibold tracking-widest text-gem-400 uppercase">Release Radar</p>
+			<div class="mt-2 flex flex-wrap items-end justify-between gap-4">
+				<div>
+					<h1 class="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+						New releases · { d.Label }
+					</h1>
+					<p class="mt-1 text-zinc-400">{ d.Range } (Monday–Sunday, UTC)</p>
+				</div>
+			</div>
+			<div class="mt-6">
+				@Pager(d.Prev, d.Next, "Week navigation")
+			</div>
+		</section>
+
+		<section class="container-site mt-10 pb-4">
+			if len(d.Days) == 0 {
+				@EmptyState(
+					"A quiet week",
+					"No tracked releases in this ISO week. Use the arrows to browse neighbouring weeks.",
+					"",
+					"",
+				)
+			} else {
+				<div class="space-y-12">
+					for _, day := range d.Days {
+						<div>
+							<h2 class="mb-4 flex items-baseline gap-3">
+								<span class="font-display text-xl font-bold text-white">{ day.Date.Format("Monday") }</span>
+								<span class="text-sm text-zinc-500">{ day.Date.Format("January 2") }</span>
+								<span class="text-xs text-zinc-600">{ lenLabel(len(day.Cards)) }</span>
+							</h2>
+							@GameCardGrid(day.Cards)
+						</div>
+					}
+				</div>
+			}
+		</section>
+	}
+}

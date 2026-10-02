@@ -1,0 +1,372 @@
+{
+ "response": {
+  "store_items": [
+   {
+    "item_type": 0,
+    "id": 367520,
+    "success": 1,
+    "visible": true,
+    "name": "Hollow Knight",
+    "store_url_path": "app/367520/Hollow_Knight",
+    "store_url_slug": "Hollow_Knight",
+    "appid": 367520,
+    "type": 0,
+    "tagids": [
+     1628,
+     1625,
+     29482,
+     4026,
+     1756,
+     3871,
+     492,
+     4182,
+     3834,
+     4166,
+     21,
+     1742,
+     6815,
+     6971,
+     19,
+     4604,
+     1695,
+     4726,
+     7481,
+     3798
+    ],
+    "categories": {
+     "supported_player_categoryids": [
+      2
+     ],
+     "feature_categoryids": [
+      22,
+      29,
+      23,
+      41,
+      42,
+      43,
+      62
+     ],
+     "controller_categoryids": [
+      28
+     ]
+    },
+    "reviews": {
+     "summary_filtered": {
+      "review_count": 504430,
+      "percent_positive": 96,
+      "review_score": 9,
+      "review_score_label": "Overwhelmingly Positive"
+     },
+     "summary_language_specific": {
+      "review_count": 184509,
+      "percent_positive": 97,
+      "review_score": 9,
+      "review_score_label": "Overwhelmingly Positive"
+     }
+    },
+    "basic_info": {
+     "short_description": "Forge your own path in Hollow Knight! An epic action adventure through a vast ruined kingdom of insects and heroes. Explore twisting caverns, battle tainted creatures and befriend bizarre bugs, all in a classic, hand-drawn 2D style.",
+     "publishers": [
+      {
+       "name": "Team Cherry",
+       "creator_clan_account_id": 33040195
+      }
+     ],
+     "developers": [
+      {
+       "name": "Team Cherry",
+       "creator_clan_account_id": 33040195
+      }
+     ],
+     "franchises": [
+      {
+       "name": "Hollow Knight"
+      }
+     ]
+    },
+    "tags": [
+     {
+      "tagid": 1628,
+      "weight": 935
+     },
+     {
+      "tagid": 1625,
+      "weight": 700
+     },
+     {
+      "tagid": 29482,
+      "weight": 694
+     },
+     {
+      "tagid": 4026,
+      "weight": 688
+     },
+     {
+      "tagid": 1756,
+      "weight": 684
+     },
+     {
+      "tagid": 3871,
+      "weight": 681
+     },
+     {
+      "tagid": 492,
+      "weight": 677
+     },
+     {
+      "tagid": 4182,
+      "weight": 555
+     },
+     {
+      "tagid": 3834,
+      "weight": 526
+     },
+     {
+      "tagid": 4166,
+      "weight": 522
+     },
+     {
+      "tagid": 21,
+      "weight": 477
+     },
+     {
+      "tagid": 1742,
+      "weight": 467
+     },
+     {
+      "tagid": 6815,
+      "weight": 359
+     },
+     {
+      "tagid": 6971,
+      "weight": 355
+     },
+     {
+      "tagid": 19,
+      "weight": 342
+     },
+     {
+      "tagid": 4604,
+      "weight": 319
+     },
+     {
+      "tagid": 1695,
+      "weight": 301
+     },
+     {
+      "tagid": 4726,
+      "weight": 273
+     },
+     {
+      "tagid": 7481,
+      "weight": 224
+     },
+     {
+      "tagid": 3798,
+      "weight": 211
+     }
+    ],
+    "assets": {
+     "asset_url_format": "steam/apps/367520/${FILENAME}?t=1776125684",
+     "main_capsule": "f30cc19e25cce7e46cd7dfe89f3ee7852e634232/capsule_616x353.jpg",
+     "main_capsule_2x": "f30cc19e25cce7e46cd7dfe89f3ee7852e634232/capsule_616x353_2x.jpg",
+     "small_capsule": "fba7289f4c7e90ae9c0caa87e4225f3f9111d7dd/capsule_231x87.jpg",
+     "small_capsule_2x": "fba7289f4c7e90ae9c0caa87e4225f3f9111d7dd/capsule_231x87_2x.jpg",
+     "header": "3c3489495136b26b34f8a9543c7f5645b99d388c/header.jpg",
+     "header_2x": "3c3489495136b26b34f8a9543c7f5645b99d388c/header_2x.jpg",
+     "hero_capsule": "e6cd56dba0de70a88e249fcf8721362ba24a9f82/hero_capsule.jpg",
+     "hero_capsule_2x": "e6cd56dba0de70a88e249fcf8721362ba24a9f82/hero_capsule_2x.jpg",
+     "library_capsule": "1eebc7e077ee345f126df35cd99c124273c4e4e3/library_capsule.jpg",
+     "library_capsule_2x": "1eebc7e077ee345f126df35cd99c124273c4e4e3/library_capsule_2x.jpg",
+     "library_hero": "0daf3933d392d7bb7c5a890917e20c917fcc458e/library_hero.jpg",
+     "library_hero_2x": "0daf3933d392d7bb7c5a890917e20c917fcc458e/library_hero_2x.jpg",
+     "community_icon": "f6ab055c2366237200b1a31cccbd6cf81e436d72",
+     "page_background_path": "app/367520?t=1776125684",
+     "last_modified": 1776125684
+    },
+    "best_purchase_option": {
+     "packageid": 66613,
+     "purchase_option_name": "Hollow Knight",
+     "final_price_in_cents": "1499",
+     "formatted_final_price": "$14.99",
+     "user_can_purchase_as_gift": true,
+     "hide_discount_pct_for_compliance": false,
+     "included_game_count": 1,
+     "must_purchase_as_set": false,
+     "package_group": "default",
+     "price_cannot_be_displayed_as_discount": false
+    }
+   },
+   {
+    "item_type": 0,
+    "id": 2201700,
+    "success": 1,
+    "visible": true,
+    "name": "Beyond The Lens",
+    "store_url_path": "app/2201700/Beyond_The_Lens",
+    "store_url_slug": "Beyond_The_Lens",
+    "appid": 2201700,
+    "type": 0,
+    "is_free": true,
+    "tagids": [
+     3834,
+     7926,
+     30358,
+     1710,
+     5900,
+     597,
+     1695,
+     3839,
+     599,
+     4166,
+     5125,
+     4400,
+     4305,
+     4175,
+     4182,
+     4252,
+     4094,
+     1714,
+     4191,
+     21
+    ],
+    "categories": {
+     "supported_player_categoryids": [
+      2
+     ],
+     "feature_categoryids": [
+      62
+     ]
+    },
+    "reviews": {
+     "summary_filtered": {
+      "review_count": 0,
+      "percent_positive": 0,
+      "review_score": 0,
+      "review_score_label": "No user reviews"
+     }
+    },
+    "basic_info": {
+     "short_description": "📸",
+     "publishers": [
+      {
+       "name": "Ben Koder"
+      }
+     ],
+     "developers": [
+      {
+       "name": "Ben Koder"
+      }
+     ]
+    },
+    "tags": [
+     {
+      "tagid": 3834,
+      "weight": 721
+     },
+     {
+      "tagid": 7926,
+      "weight": 707
+     },
+     {
+      "tagid": 30358,
+      "weight": 692
+     },
+     {
+      "tagid": 1710,
+      "weight": 678
+     },
+     {
+      "tagid": 5900,
+      "weight": 661
+     },
+     {
+      "tagid": 597,
+      "weight": 646
+     },
+     {
+      "tagid": 1695,
+      "weight": 632
+     },
+     {
+      "tagid": 3839,
+      "weight": 612
+     },
+     {
+      "tagid": 599,
+      "weight": 563
+     },
+     {
+      "tagid": 4166,
+      "weight": 563
+     },
+     {
+      "tagid": 5125,
+      "weight": 534
+     },
+     {
+      "tagid": 4400,
+      "weight": 474
+     },
+     {
+      "tagid": 4305,
+      "weight": 437
+     },
+     {
+      "tagid": 4175,
+      "weight": 431
+     },
+     {
+      "tagid": 4182,
+      "weight": 388
+     },
+     {
+      "tagid": 4252,
+      "weight": 342
+     },
+     {
+      "tagid": 4094,
+      "weight": 293
+     },
+     {
+      "tagid": 1714,
+      "weight": 241
+     },
+     {
+      "tagid": 4191,
+      "weight": 189
+     },
+     {
+      "tagid": 21,
+      "weight": 186
+     }
+    ],
+    "assets": {
+     "asset_url_format": "steam/apps/2201700/${FILENAME}?t=1756799779",
+     "main_capsule": "capsule_616x353.jpg",
+     "small_capsule": "capsule_231x87.jpg",
+     "header": "header.jpg",
+     "hero_capsule": "hero_capsule.jpg",
+     "library_capsule": "library_600x900.jpg",
+     "library_capsule_2x": "library_600x900_2x.jpg",
+     "library_hero": "library_hero.jpg",
+     "library_hero_2x": "library_hero_2x.jpg",
+     "community_icon": "b1f66a89be5daa5d237e4b6045d23b6a860bcc88",
+     "page_background_path": "app/2201700?t=1756799779",
+     "last_modified": 1756799779
+    },
+    "is_coming_soon": true
+   },
+   {
+    "item_type": 0,
+    "id": 999999999,
+    "success": 15,
+    "visible": false,
+    "name": "",
+    "store_url_path": "app/0/",
+    "store_url_slug": "",
+    "appid": 0
+   }
+  ]
+ }
+}

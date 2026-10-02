@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/embiem/go-web-template/data"
-	"github.com/embiem/go-web-template/db"
-	"github.com/embiem/go-web-template/view"
+	"github.com/embiem/indie-game-gems/data"
+	"github.com/embiem/indie-game-gems/db"
+	"github.com/embiem/indie-game-gems/view"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"

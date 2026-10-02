@@ -1,0 +1,288 @@
+package view
+
+import (
+	"time"
+
+	"github.com/embiem/indie-game-gems/data"
+)
+
+// Newsletter pages: public signup (double opt-in), the sent-issue archive
+// and the confirmation / unsubscribe flows. The signup form posts to
+// POST /newsletter/subscribe and swaps the #newsletter-signup slot via htmx;
+// without JS it falls back to a full page render of the same component.
+
+// NewsletterPageData is everything GetNewsletterPage needs.
+type NewsletterPageData struct {
+	Meta   PageMeta
+	Issues []data.ListSentIssuesRow
+	Form   NewsletterFormState
+}
+
+// NewsletterFormState is one render of the signup slot: a fresh form, the
+// success card, or the form with a validation error.
+type NewsletterFormState struct {
+	Email   string
+	Kind    string // "" fresh | "success" | "error"
+	Message string
+}
+
+// SuccessResponse is the single response the subscribe endpoint shows for
+// every real address, whether it exists or not (no enumeration).
+const SuccessResponse = "Almost there — check your inbox for the confirmation link."
+
+templ NewsletterPage(d NewsletterPageData) {
+	@Layout(d.Meta) {
+		<section class="container-site py-16 sm:py-20">
+			<div class="mx-auto max-w-2xl text-center">
+				<p class="font-display text-xs font-semibold tracking-widest text-gem-400 uppercase">Newsletter</p>
+				<h1 class="mt-3 font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
+					One great indie game a week
+				</h1>
+				<p class="mx-auto mt-4 max-w-xl text-zinc-400">
+					A short, human-written mail: the Game of the Day we loved most, the week&#8217;s fresh
+					releases and the month&#8217;s best. No algorithm, no spam — unsubscribe in one click.
+				</p>
+			</div>
+			<div class="mx-auto mt-10 max-w-md">
+				@newsletterSignup(d.Form, "", false)
+			</div>
+		</section>
+		<section class="container-site pb-20">
+			<div class="mx-auto max-w-2xl">
+				<h2 class="font-display text-xl font-bold text-white">Past issues</h2>
+				if len(d.Issues) == 0 {
+					<p class="mt-4 text-sm text-zinc-500">Nothing sent yet — the archive fills up with the first issue.</p>
+				} else {
+					<ul class="mt-4 divide-y divide-white/5 overflow-hidden rounded-2xl border border-white/5 bg-night-900/40">
+						for _, iss := range d.Issues {
+							<li>
+								<a href={ "/newsletter/issues/" + iss.Slug } class="flex items-baseline justify-between gap-4 px-5 py-4 transition hover:bg-white/5">
+									<span class="font-medium text-zinc-200">{ iss.Subject }</span>
+									<span class="shrink-0 text-xs text-zinc-500">{ formatSentDate(iss.SentAt.Time) }</span>
+								</a>
+							</li>
+						}
+					</ul>
+				}
+			</div>
+		</section>
+	}
+}
+
+// NewsletterSignup is the exported handle for the htmx swap slot: handlers
+// re-render it as the POST /newsletter/subscribe response partial. id
+// disambiguates instances on one page ("" on /newsletter, "home", "footer");
+// every DOM id derives from it so forms never collide.
+templ NewsletterSignup(form NewsletterFormState, id string) {
+	@newsletterSignup(form, id, false)
+}
+
+// NewsletterSignupCompact is the footer-sized variant: one row, no microcopy.
+templ NewsletterSignupCompact(form NewsletterFormState, id string) {
+	@newsletterSignup(form, id, true)
+}
+
+// newsletterSignup is the htmx swap slot. The root keeps its id in every
+// variant so hx-swap="outerHTML" can replace it with any other variant.
+templ newsletterSignup(form NewsletterFormState, id string, compact bool) {
+	<div id={ signupDomID(id) }>
+		if form.Kind == "success" {
+			<div class="rounded-2xl border border-gem-500/30 bg-gem-500/10 p-6 text-center" role="status">
+				<p class="font-display text-lg font-semibold text-gem-300">{ SuccessResponse }</p>
+				<p class="mt-2 text-sm text-zinc-400">
+					Wrong address? Just sign up again — each new confirmation replaces the last one.
+				</p>
+			</div>
+		} else {
+			<form
+				method="post"
+				action="/newsletter/subscribe"
+				hx-post="/newsletter/subscribe"
+				hx-target={ "#" + signupDomID(id) }
+				hx-swap="outerHTML"
+				class={ signupFormClass(compact) }
+			>
+				<label for={ signupEmailID(id) } class="sr-only">Email address</label>
+				<input
+					type="email"
+					id={ signupEmailID(id) }
+					name="email"
+					value={ form.Email }
+					required
+					autocomplete="email"
+					placeholder="you@example.com"
+					class={ signupInputClass(compact) }
+				/>
+				<!-- Honeypot: humans never see or fill this; bots do. -->
+				<input type="text" name="organization" value="" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden"/>
+				if form.Kind == "error" {
+					<p class={ signupErrorClass(compact) } role="alert">{ form.Message }</p>
+				}
+				<button type="submit" class={ ButtonClass("primary", "lg", signupButtonExtra(compact)) }>
+					Subscribe
+				</button>
+				if !compact {
+					<p class="text-center text-xs text-zinc-600">
+						One email a week. Unsubscribe any time with one click. We never share your address.
+					</p>
+				}
+			</form>
+		}
+	</div>
+}
+
+func signupFormClass(compact bool) string {
+	if compact {
+		return "flex gap-2"
+	}
+	return "space-y-3"
+}
+
+func signupInputClass(compact bool) string {
+	base := "rounded-xl border border-white/10 bg-night-900 px-4 py-3 text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-gem-500 focus:ring-2 focus:ring-gem-500/30"
+	if compact {
+		return base + " min-w-0 flex-1"
+	}
+	return base + " w-full"
+}
+
+func signupErrorClass(compact bool) string {
+	if compact {
+		return "w-full text-sm text-red-400"
+	}
+	return "text-sm text-red-400"
+}
+
+func signupButtonExtra(compact bool) string {
+	if compact {
+		return ""
+	}
+	return "w-full"
+}
+
+// signupDomID is the swap-slot root id for an instance suffix.
+func signupDomID(id string) string {
+	if id == "" {
+		return "newsletter-signup"
+	}
+	return "newsletter-signup-" + id
+}
+
+// signupEmailID is the email input/label id for an instance suffix.
+func signupEmailID(id string) string {
+	if id == "" {
+		return "newsletter-email"
+	}
+	return "newsletter-email-" + id
+}
+
+func formatSentDate(t time.Time) string {
+	return t.Format("Jan 2, 2006")
+}
+
+// ---------------------------------------------------------------------------
+// Confirmation result page (GET /newsletter/confirm?token=)
+
+// NewsletterConfirmPage shows the outcome of POSTing a confirmation token:
+// ok, already, expired, invalid (incl. withdrawn-before-confirming, which
+// is phrased neutrally — a status page must not leak more than the link
+// holder already knows). The "ready" state is the GET page: a button that
+// POSTs the token, so mail-scanner prefetches can never confirm anyone.
+templ NewsletterConfirmPage(outcome string, token string, email string) {
+	@Layout(PageMeta{
+		Title:       "Confirm your subscription",
+		Description: "Confirm your Indie Game Gems newsletter subscription.",
+		Canonical:   "/newsletter",
+		NoIndex:     true,
+	}) {
+		<section class="container-site flex flex-col items-center py-24 text-center sm:py-32">
+			<div class="relative">
+				@GemMark("h-16 w-16 opacity-90")
+				if outcome == "ok" || outcome == "already" {
+					<span class="absolute -right-6 -bottom-2 rotate-12 rounded-lg bg-gem-600 px-2 py-0.5 font-display text-sm font-bold text-white shadow-lg">✓</span>
+				}
+			</div>
+			if outcome == "ready" {
+				<h1 class="mt-8 font-display text-3xl font-bold text-white sm:text-4xl">One click to finish</h1>
+				<p class="mt-4 max-w-md text-zinc-400">
+					Confirm your subscription to start getting Indie Game Gems.
+				</p>
+				<form method="post" action="/newsletter/confirm" class="mt-8">
+					<input type="hidden" name="token" value={ token }/>
+					<button type="submit" class={ ButtonClass("primary", "lg", "") }>Confirm subscription</button>
+				</form>
+			} else if outcome == "ok" {
+				<h1 class="mt-8 font-display text-3xl font-bold text-white sm:text-4xl">You&#8217;re in!</h1>
+				<p class="mt-4 max-w-md text-zinc-400">
+					{ email } is confirmed. The next issue lands in your inbox — one great indie game a week.
+				</p>
+			} else if outcome == "already" {
+				<h1 class="mt-8 font-display text-3xl font-bold text-white sm:text-4xl">Already confirmed</h1>
+				<p class="mt-4 max-w-md text-zinc-400">
+					{ email } was already confirmed — nothing more to do.
+				</p>
+			} else if outcome == "expired" {
+				<h1 class="mt-8 font-display text-3xl font-bold text-white sm:text-4xl">Link expired</h1>
+				<p class="mt-4 max-w-md text-zinc-400">
+					Confirmation links are valid for three days. Sign up again and you&#8217;ll get a fresh one.
+				</p>
+				<a href="/newsletter" class={ ButtonClass("primary", "lg", "mt-8") }>Back to the newsletter</a>
+			} else {
+				<h1 class="mt-8 font-display text-3xl font-bold text-white sm:text-4xl">This link doesn&#8217;t work</h1>
+				<p class="mt-4 max-w-md text-zinc-400">
+					It may already have been used, or the address unsubscribed before confirming.
+					Signing up again always starts a fresh confirmation.
+				</p>
+				<a href="/newsletter" class={ ButtonClass("primary", "lg", "mt-8") }>Back to the newsletter</a>
+			}
+		</section>
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Unsubscribe (GET + POST /newsletter/unsubscribe/{token})
+
+// NewsletterUnsubscribePage is the click-through from the mail: the token in
+// the URL is the bearer proof, the button is a plain same-origin form POST.
+templ NewsletterUnsubscribePage(token string, email string) {
+	@Layout(PageMeta{
+		Title:       "Unsubscribe",
+		Description: "Leave the Indie Game Gems newsletter.",
+		Canonical:   "/newsletter",
+		NoIndex:     true,
+	}) {
+		<section class="container-site flex flex-col items-center py-24 text-center sm:py-32">
+			<h1 class="font-display text-3xl font-bold text-white sm:text-4xl">Leave the newsletter?</h1>
+			<p class="mt-4 max-w-md text-zinc-400">
+				This will unsubscribe <span class="text-zinc-200">{ email }</span> from every
+				future issue. You can sign up again any time.
+			</p>
+			<form method="post" action={ "/newsletter/unsubscribe/" + token } class="mt-8">
+				<button type="submit" class={ ButtonClass("primary", "lg", "") }>Confirm unsubscribe</button>
+			</form>
+		</section>
+	}
+}
+
+// NewsletterUnsubscribedPage is the response to the unsubscribe POST — for
+// the browser form and for the mailbox provider's RFC 8058 one-click POST
+// alike (200, no redirect; providers ignore the body).
+templ NewsletterUnsubscribedPage(email string) {
+	@Layout(PageMeta{
+		Title:       "Unsubscribed",
+		Description: "You have been unsubscribed from the Indie Game Gems newsletter.",
+		Canonical:   "/newsletter",
+		NoIndex:     true,
+	}) {
+		<section class="container-site flex flex-col items-center py-24 text-center sm:py-32">
+			<h1 class="font-display text-3xl font-bold text-white sm:text-4xl">Done — you&#8217;re out.</h1>
+			if email != "" {
+				<p class="mt-4 max-w-md text-zinc-400">
+					{ email } will not receive any further issues. Changed your mind?
+					<a href="/newsletter" class="text-gem-400 hover:text-gem-300">Sign up again</a> —
+					it takes one confirmation click.
+				</p>
+			}
+		</section>
+	}
+}

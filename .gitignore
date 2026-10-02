@@ -1,3 +1,10 @@
 .env*
 !.env.example
 tmp/
+media/
+
+# Build outputs
+/gems
+/server
+/indie-game-gems
+build-errors.log

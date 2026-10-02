@@ -1,0 +1,6 @@
+BEGIN;
+
+DROP TABLE game_tags;
+DROP TABLE tags;
+
+COMMIT;

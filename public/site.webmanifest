@@ -1,1 +1,14 @@
-{"name":"","short_name":"","icons":[{"src":"/public/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/public/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+{
+  "name": "Indie Game Gems",
+  "short_name": "IG Gems",
+  "description": "Discover great indie games you might have missed — one curated gem a day.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0d17",
+  "theme_color": "#0f0d17",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/android-chrome-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/android-chrome-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

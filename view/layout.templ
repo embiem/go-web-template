@@ -1,21 +1,157 @@
 package view
 
-templ Layout() {
+import "strings"
+
+templ Layout(meta PageMeta) {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="dark">
+	<html lang="en">
 		<head>
-			<title>embiem's Go Web Template</title>
-			<link rel="icon" type="image/x-icon" href="/public/favicon.ico"/>
-			<link rel="apple-touch-icon" href="/public/apple-touch-icon.png"/>
-			<link rel="manifest" href="/public/site.webmanifest"/>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ meta.FullTitle() }</title>
+			<meta name="description" content={ meta.ogDescription() }/>
+			<link rel="canonical" href={ AbsURL(meta.Canonical) }/>
+			if meta.NoIndex {
+				<meta name="robots" content="noindex"/>
+			}
+			<link rel="icon" type="image/svg+xml" href="/public/favicon.svg"/>
+			<link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png"/>
+			<link rel="apple-touch-icon" href="/public/apple-touch-icon.png"/>
+			<link rel="manifest" href="/public/site.webmanifest"/>
+			<meta name="theme-color" content="#0f0d17"/>
+			<meta property="og:site_name" content="Indie Game Gems"/>
+			<meta property="og:title" content={ meta.FullTitle() }/>
+			<meta property="og:description" content={ meta.ogDescription() }/>
+			<meta property="og:type" content={ meta.ogType() }/>
+			<meta property="og:url" content={ AbsURL(meta.Canonical) }/>
+			if meta.OGImage != "" {
+				<meta property="og:image" content={ meta.OGImage }/>
+			}
+			<meta name="twitter:card" content={ twitterCard(meta) }/>
+			<meta name="twitter:title" content={ meta.FullTitle() }/>
+			<meta name="twitter:description" content={ meta.ogDescription() }/>
+			if meta.OGImage != "" {
+				<meta name="twitter:image" content={ meta.OGImage }/>
+			}
+			<link rel="alternate" type="application/rss+xml" title="Indie Game Gems — Game of the Day" href={ AbsURL("/feed.xml") }/>
 			<link rel="stylesheet" href="/public/output.css"/>
-			<script src="https://unpkg.com/htmx.org@2.0.1" defer></script>
-			<script src="https://unpkg.com/htmx-ext-sse@2.2.1/sse.js" defer></script>
+			<script src="/public/js/htmx.min.js" defer></script>
+			<script src="/public/js/trailer.js" defer></script>
 		</head>
-		<body class="antialiased bg-white min-h-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 prose">
-			{ children... }
+		<body class="flex min-h-dvh flex-col bg-night-950 font-sans text-zinc-300 antialiased">
+			<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-gem-600 focus:px-4 focus:py-2 focus:text-white">
+				Skip to content
+			</a>
+			@SiteHeader(meta.Canonical)
+			<main id="main" class="flex-1">
+				{ children... }
+			</main>
+			@SiteFooter()
 		</body>
 	</html>
+}
+
+// twitterCard uses the large image card only when an image exists.
+func twitterCard(meta PageMeta) string {
+	if meta.OGImage != "" {
+		return "summary_large_image"
+	}
+	return "summary"
+}
+
+templ SiteHeader(activePath string) {
+	<header class="sticky top-0 z-40 border-b border-white/5 bg-night-950/85 backdrop-blur">
+		<div class="container-site flex h-16 items-center gap-3">
+			<a href="/" class="flex shrink-0 items-center gap-2" aria-label="Indie Game Gems — home">
+				@GemMark("h-7 w-7")
+				<span class="font-display text-base font-bold tracking-tight text-white min-[420px]:text-lg">
+					<span class="hidden min-[480px]:inline">Indie Game </span><span class="text-gem-400">Gems</span>
+				</span>
+			</a>
+			<nav aria-label="Main" class="no-scrollbar -mx-1 flex min-w-0 flex-1 items-center justify-end gap-0.5 overflow-x-auto px-1 text-sm font-medium">
+				@NavItem("/game-of-the-day", "Today", "Game of the Day", activePath)
+				@NavItem("/release-radar", "Radar", "Release Radar", activePath)
+				@NavItem("/top", "Top", "Top", activePath)
+				@NavItem("/newsletter", "Newsletter", "Newsletter", activePath)
+			</nav>
+		</div>
+	</header>
+}
+
+templ NavItem(href, shortLabel, label, activePath string) {
+	<a
+		href={ href }
+		aria-current={ navCurrent(href, activePath) }
+		class={ templ.Classes("shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-zinc-400 transition hover:bg-white/5 hover:text-white", templ.KV("bg-white/10 text-white", isNavActive(href, activePath))) }
+	>
+		<span class="sm:hidden">{ shortLabel }</span>
+		<span class="hidden sm:inline">{ label }</span>
+	</a>
+}
+
+func isNavActive(href, activePath string) bool {
+	if href == "/" {
+		return activePath == "/"
+	}
+	return strings.HasPrefix(activePath, href)
+}
+
+func navCurrent(href, activePath string) string {
+	if isNavActive(href, activePath) {
+		return "page"
+	}
+	return ""
+}
+
+templ SiteFooter() {
+	<footer class="mt-20 border-t border-white/5 bg-night-900/40">
+		<div class="container-site grid grid-cols-1 gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="space-y-3">
+				<div class="flex items-center gap-2">
+					@GemMark("h-6 w-6")
+					<span class="font-display text-base font-bold text-white">Indie Game <span class="text-gem-400">Gems</span></span>
+				</div>
+				<p class="text-sm text-zinc-500">
+					Discover great indie games you might have missed — curated by humans, not by an algorithm.
+				</p>
+			</div>
+			<nav aria-label="Explore" class="space-y-3 text-sm">
+				<h2 class="font-display text-xs font-semibold tracking-widest text-zinc-500 uppercase">Explore</h2>
+				<ul class="space-y-2">
+					<li><a href="/game-of-the-day" class="text-zinc-400 transition hover:text-gem-300">Game of the Day</a></li>
+					<li><a href="/release-radar" class="text-zinc-400 transition hover:text-gem-300">Release Radar</a></li>
+					<li><a href="/top" class="text-zinc-400 transition hover:text-gem-300">Top of the Month</a></li>
+				</ul>
+			</nav>
+			<nav aria-label="Subscribe" class="space-y-3 text-sm">
+				<h2 class="font-display text-xs font-semibold tracking-widest text-zinc-500 uppercase">Subscribe</h2>
+				@NewsletterSignupCompact(NewsletterFormState{}, "footer")
+				<ul class="space-y-2">
+					<li><a href="/newsletter" class="text-zinc-400 transition hover:text-gem-300">Newsletter</a></li>
+					<li><a href={ AbsURL("/feed.xml") } class="text-zinc-400 transition hover:text-gem-300">RSS — Game of the Day</a></li>
+				</ul>
+			</nav>
+			<div class="space-y-3 text-sm text-zinc-500">
+				<h2 class="font-display text-xs font-semibold tracking-widest text-zinc-500 uppercase">About</h2>
+				<p>An independent discovery channel for PC indies. Prices and availability live on the store pages.</p>
+			</div>
+		</div>
+		<div class="border-t border-white/5">
+			<div class="container-site flex flex-col gap-2 py-6 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between">
+				<p>© 2026 Indie Game Gems. Not affiliated with Valve, GOG, Epic Games or itch.io.</p>
+				<p>Game data from Steam &amp; IGDB.</p>
+			</div>
+		</div>
+	</footer>
+}
+
+// GemMark is the site's faceted-gem logo mark. Facets use translucent dark
+// strokes so it reads on any surface; no gradient IDs (safe to repeat).
+templ GemMark(class string) {
+	<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+		<path d="M6.2 3.5h11.6L21.5 9 12 21 2.5 9Z" fill="#a55eff"></path>
+		<path d="M6.2 3.5 9.4 9 12 21 14.6 9l3.2-5.5" stroke="#0f0d17" stroke-width="1.1" stroke-linejoin="round" opacity="0.55"></path>
+		<path d="M2.5 9h19" stroke="#0f0d17" stroke-width="1.1" opacity="0.55"></path>
+		<path d="M6.2 3.5 9.4 9 12 21 14.6 9l3.2-5.5" stroke="#ffffff" stroke-width="0.6" stroke-linejoin="round" opacity="0.35"></path>
+	</svg>
 }

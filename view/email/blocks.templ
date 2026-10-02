@@ -1,0 +1,113 @@
+package email
+
+// gotdBlock is the Game of the Day: one hero card with image, note and
+// store buttons.
+templ gotdBlock(g *Gotd) {
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4eee0;border:1px solid #e3d9c6;border-radius:12px;">
+		<tr>
+			<td style="padding:20px;">
+				<p style="margin:0 0 12px 0;color:#8b3fe6;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">{ g.Heading }</p>
+				@gameCardBody(g.Game)
+				if g.NoteHTML != "" {
+					<div style="color:#4a4438;font-size:14px;margin-top:12px;">@templ.Raw(g.NoteHTML)</div>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+// sectionBlock renders Release Radar (ranked=false) and Top of the Month
+// (ranked=true) as a compact game list.
+templ sectionBlock(s *Section, ranked bool) {
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td style="padding:12px 0 4px 0;">
+				<h2 style="margin:0;color:#2b2622;font-size:18px;font-weight:700;letter-spacing:-0.01em;">{ s.Heading }</h2>
+			</td>
+		</tr>
+		for i, g := range s.Items {
+			<tr>
+				<td style="padding:10px 0;border-bottom:1px solid #e9e0cd;">
+					<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							if ranked {
+								<td width="34" valign="top" style="padding-right:8px;color:#8b3fe6;font-size:18px;font-weight:700;">{ fmtInt(i + 1) }.</td>
+							}
+							<td valign="top">
+								<div style="font-size:15px;font-weight:600;">
+									if g.GameURL != "" {
+										<a href={ templ.URL(g.GameURL) } style="color:#2b2622;text-decoration:none;">{ g.Title }</a>
+									} else {
+										{ g.Title }
+									}
+								</div>
+								<div style="color:#6f675c;font-size:13px;">
+									{ g.ReleaseLine }
+									if g.Developer != "" {
+										&#160;&#183;&#160;{ g.Developer }
+									}
+									if g.ScoreLine != "" {
+										&#160;&#183;&#160;{ g.ScoreLine }
+									}
+								</div>
+								if g.Tagline != "" {
+									<div style="color:#4a4438;font-size:14px;margin-top:4px;">{ g.Tagline }</div>
+								}
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		}
+	</table>
+}
+
+// gameCardBlock is the standalone single-game card with a hero image and
+// store buttons ("Play it on …").
+templ gameCardBlock(g *GameCard) {
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4eee0;border:1px solid #e3d9c6;border-radius:12px;">
+		<tr>
+			<td style="padding:20px;">
+				@gameCardBody(*g)
+			</td>
+		</tr>
+	</table>
+}
+
+// gameCardBody is the shared innards of the game cards: image, title,
+// metadata, tagline and store buttons.
+templ gameCardBody(g GameCard) {
+	if g.ImageURL != "" {
+		<img src={ templ.URL(g.ImageURL) } width="552" height="258" alt={ "Screenshot of " + g.Title } style="display:block;width:100%;max-width:552px;height:auto;border:0;border-radius:10px;margin-bottom:14px;"/>
+	}
+	<div style="font-size:18px;font-weight:700;letter-spacing:-0.01em;">
+		if g.GameURL != "" {
+			<a href={ templ.URL(g.GameURL) } style="color:#2b2622;text-decoration:none;">{ g.Title }</a>
+		} else {
+			{ g.Title }
+		}
+	</div>
+	<div style="color:#6f675c;font-size:13px;margin-top:2px;">
+		{ g.ReleaseLine }
+		if g.Developer != "" {
+			&#160;&#183;&#160;{ g.Developer }
+		}
+		if g.ScoreLine != "" {
+			&#160;&#183;&#160;{ g.ScoreLine }
+		}
+	</div>
+	if g.Tagline != "" {
+		<div style="color:#4a4438;font-size:14px;margin-top:8px;">{ g.Tagline }</div>
+	}
+	if len(g.Stores) > 0 {
+		<div style="margin-top:14px;">@storeButtons(g.Stores)</div>
+	}
+}
+
+// storeButtons renders the store links as pill buttons. Inline-block anchors
+// (not table cells) so they wrap on narrow screens instead of squeezing.
+templ storeButtons(stores []StoreButton) {
+	for _, s := range stores {
+		<a href={ templ.URL(s.URL) } style="display:inline-block;margin:0 6px 6px 0;padding:8px 14px;background-color:#8b3fe6;color:#fdfaf3;font-size:13px;font-weight:600;text-decoration:none;border-radius:999px;">{ s.Label }</a>
+	}
+}

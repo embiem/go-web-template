@@ -1,14 +1,321 @@
 package view
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/embiem/indie-game-gems/data"
+)
+
+// ButtonProps styles the reusable Button. Variant: "primary" | "secondary" |
+// "ghost". Type: "button" | "submit". Size: "md" | "lg".
 type ButtonProps struct {
-	Type string
+	Type    string
+	Variant string
+	Size    string
+	Class   string
+}
+
+// ButtonClass composes button styles; exported for link-styled-as-button use.
+func ButtonClass(variant, size string, extra string) string {
+	base := "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition outline-offset-2 focus-visible:outline-2 focus-visible:outline-gem-500"
+	size_ := "px-4 py-2 text-sm"
+	switch size {
+	case "lg":
+		size_ = "px-6 py-3 text-base"
+	}
+	variant_ := "bg-gem-600 text-white shadow-lg shadow-gem-600/25 hover:bg-gem-500 active:bg-gem-700"
+	switch variant {
+	case "secondary":
+		variant_ = "bg-white/5 text-zinc-100 ring-1 ring-white/15 ring-inset hover:bg-white/10 hover:ring-white/25"
+	case "ghost":
+		variant_ = "text-zinc-300 hover:bg-white/5 hover:text-white"
+	}
+	return strings.Join(strings.Fields(base+" "+size_+" "+variant_+" "+extra), " ")
 }
 
 templ Button(props ButtonProps) {
 	<button
-		type={ props.Type }
-		class="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+		type={ buttonType(props.Type) }
+		class={ ButtonClass(props.Variant, props.Size, props.Class) }
 	>
 		{ children... }
 	</button>
+}
+
+func buttonType(t string) string {
+	if t == "" {
+		return "button"
+	}
+	return t
+}
+
+// ---------------------------------------------------------------------------
+// Badges
+
+// GemScoreBadge is the diamond-shaped score medallion; empty when unscored.
+templ GemScoreBadge(score float32, large bool) {
+	if score > 0 {
+		if large {
+			<div class="flex h-14 w-14 rotate-45 items-center justify-center rounded-xl bg-gradient-to-br from-gem-400 to-gem-700 shadow-lg shadow-gem-600/40 ring-1 ring-white/30" title="Gem score (0–100)">
+				<span class="-rotate-45 font-display text-xl font-bold text-white">{ fmt.Sprintf("%.0f", score) }</span>
+			</div>
+		} else {
+			<span class="inline-flex h-9 w-9 rotate-45 items-center justify-center rounded-md bg-gradient-to-br from-gem-400 to-gem-700 ring-1 ring-white/25" title="Gem score (0–100)">
+				<span class="-rotate-45 font-display text-sm font-bold text-white">{ fmt.Sprintf("%.0f", score) }</span>
+			</span>
+		}
+	}
+}
+
+templ ReleaseBadge(card data.GameCard) {
+	<span class="inline-flex items-center gap-1.5 rounded-full bg-white/8 px-2.5 py-1 text-xs font-medium text-zinc-300 ring-1 ring-white/10 ring-inset">
+		<span class={ templ.Classes("h-1.5 w-1.5 rounded-full", releaseDotClass(card.ReleaseStatus)) } aria-hidden="true"></span>
+		{ ReleaseBadgeText(card.ReleaseStatus, card.ReleaseDate) }
+	</span>
+}
+
+// releaseDotClass colour-codes release readiness: green for out, amber for
+// early access, gem violet for upcoming/announced.
+func releaseDotClass(status string) string {
+	switch status {
+	case "released":
+		return "bg-emerald-400"
+	case "early_access":
+		return "bg-amber-400"
+	default:
+		return "bg-gem-400"
+	}
+}
+
+templ TagPill(slug, name string) {
+	<span class="inline-flex items-center rounded-full bg-gem-500/10 px-2.5 py-1 text-xs font-medium text-gem-300 ring-1 ring-gem-500/25 ring-inset">
+		{ name }
+	</span>
+}
+
+// ---------------------------------------------------------------------------
+// Game cards & media
+
+templ GameCardGrid(cards []data.GameCard) {
+	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		for _, card := range cards {
+			@GameCardItem(card, false)
+		}
+	</div>
+}
+
+// GameCardRow is a horizontal scroll-snap carousel (no JS).
+templ GameCardRow(cards []data.GameCard) {
+	<div class="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+		for _, card := range cards {
+			<div class="w-[78vw] max-w-70 shrink-0 snap-start sm:w-85">
+				@GameCardItem(card, false)
+			</div>
+		}
+	</div>
+}
+
+templ GameCardItem(card data.GameCard, flat bool) {
+	<a
+		href={ "/games/" + card.Slug }
+		class={ templ.Classes(
+			"group flex h-full flex-col overflow-hidden rounded-2xl bg-night-900 ring-1 ring-white/10 transition duration-200 hover:-translate-y-1 hover:ring-gem-500/60 hover:shadow-xl hover:shadow-gem-600/10",
+			templ.KV("hover:-translate-y-0", flat),
+		) }
+	>
+		<div class="relative aspect-460/215 w-full overflow-hidden">
+			@GameCardMedia(card)
+			<div class="absolute top-2.5 right-2.5">
+				@GemScoreBadge(gemScore(card), false)
+			</div>
+		</div>
+		<div class="flex flex-1 flex-col gap-1.5 p-4">
+			<h3 class="font-display text-base leading-snug font-bold text-white transition group-hover:text-gem-300">{ card.Title }</h3>
+			<p class="line-clamp-2 text-sm text-zinc-400">{ card.Tagline }</p>
+			<div class="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-2 text-xs text-zinc-500">
+				if card.DeveloperSlug != "" {
+					<span class="hover:text-zinc-300">{ card.DeveloperName }</span>
+					<span aria-hidden="true">·</span>
+				}
+				<span>{ ReleaseBadgeText(card.ReleaseStatus, card.ReleaseDate) }</span>
+			</div>
+		</div>
+	</a>
+}
+
+// gemScore maps the nullable score to the float the badge expects (0 hides it).
+func gemScore(card data.GameCard) float32 {
+	if !card.GemScore.Valid {
+		return 0
+	}
+	return card.GemScore.Float32
+}
+
+// GameCardMedia renders the card art, degrading to a deterministic gradient
+// tile carrying the title while images are still being downloaded.
+templ GameCardMedia(card data.GameCard) {
+	if card.MediaKey != "" {
+		<img
+			src={ MediaURL(card.MediaKey) }
+			alt={ card.Title + " cover art" }
+			width="460"
+			height="215"
+			loading="lazy"
+			decoding="async"
+			class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+		/>
+	} else {
+		<div class="flex h-full w-full items-center justify-center px-6 text-center" style={ TileGradient(card.Slug) }>
+			<div>
+				@GemMark("mx-auto h-6 w-6 opacity-70")
+				<span class="mt-2 block font-display text-base leading-tight font-bold text-white/90">{ card.Title }</span>
+			</div>
+		</div>
+	}
+}
+
+// SectionHeader is the standard section heading row with its "view all" link.
+templ SectionHeader(kicker, title, linkHref, linkLabel string) {
+	<div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+		<div>
+			if kicker != "" {
+				<p class="text-xs font-semibold tracking-widest text-gem-400 uppercase">{ kicker }</p>
+			}
+			<h2 class="font-display text-2xl font-bold text-white sm:text-3xl">{ title }</h2>
+		</div>
+		if linkHref != "" {
+			<a href={ linkHref } class="group inline-flex items-center gap-1 text-sm font-semibold text-zinc-300 transition hover:text-gem-300">
+				{ linkLabel }
+				<span aria-hidden="true" class="transition group-hover:translate-x-0.5">→</span>
+			</a>
+		}
+	</div>
+}
+
+// ---------------------------------------------------------------------------
+// Store buttons
+
+templ StoreButtonsBar(buttons []StoreButton, size string) {
+	if len(buttons) > 0 {
+		<div class="flex flex-wrap items-center gap-2.5">
+			for _, b := range buttons {
+				<a
+					href={ b.URL }
+					target="_blank"
+					rel="noopener"
+					aria-label={ b.Label }
+					class={ ButtonClass(storeVariant(b.Primary), storeSize(size), "min-h-11") }
+				>
+					@StoreIcon(b.Store, "h-5 w-5 shrink-0")
+					<span>{ b.Label }</span>
+				</a>
+			}
+		</div>
+	}
+}
+
+func storeVariant(primary bool) string {
+	if primary {
+		return ""
+	}
+	return "secondary"
+}
+
+func storeSize(size string) string {
+	if size == "lg" {
+		return "lg"
+	}
+	return ""
+}
+
+// StoreIcon draws simple, own-made store glyphs (not the trademarked logos).
+templ StoreIcon(store, class string) {
+	switch store {
+	case "steam":
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.7"></circle>
+			<circle cx="15.2" cy="8.8" r="2.7" stroke="currentColor" stroke-width="1.7"></circle>
+			<circle cx="8.7" cy="14.9" r="1.9" fill="currentColor"></circle>
+			<path d="m10.3 13.7 2.6-2.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+		</svg>
+	case "gog":
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<rect x="2.6" y="7.4" width="18.8" height="9.2" rx="2.6" stroke="currentColor" stroke-width="1.7"></rect>
+			<path d="M8.4 10.6a2 2 0 1 0 .6 3.5m6-3.5a2 2 0 1 0 .6 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+			<circle cx="14.4" cy="12" r="0.4" fill="currentColor"></circle>
+		</svg>
+	case "epic":
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<path d="M5 3.8h14c0 6.1-.4 12.3-2.5 15.2-1.2 1.7-3.6 2.2-4.5 2.2s-3.3-.5-4.5-2.2C5.4 16.1 5 9.9 5 3.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path>
+			<path d="M9.4 8h5.2m-5.2 3.4h5.2m-5.2 3.4h3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+		</svg>
+	case "itch":
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<path d="M4 8.2 5.6 5c.4-.8 1.2-1.3 2.1-1.3h8.6c.9 0 1.7.5 2.1 1.3L20 8.2M4 8.2c-.9 0-1.5.9-1.3 1.8l.5 2.2c.2.8.9 1.3 1.7 1.3V18c0 1.2 1 2.2 2.2 2.2h9.8c1.2 0 2.2-1 2.2-2.2v-4.5c.8 0 1.5-.5 1.7-1.3l.5-2.2c.2-.9-.4-1.8-1.3-1.8M4 8.2h16M9 15.5c.8.7 1.9 1.2 3 1.2s2.2-.5 3-1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+		</svg>
+	case "humble":
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<rect x="4.4" y="4.4" width="15.2" height="15.2" rx="4" stroke="currentColor" stroke-width="1.7"></rect>
+			<path d="M9.3 15.8V8.2m5.4 7.6V8.2M9.3 12.1h5.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+		</svg>
+	default:
+		<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.7"></circle>
+			<path d="M2.75 12h18.5M12 2.75c-5.5 5.6-5.5 12.9 0 18.5 5.5-5.6 5.5-12.9 0-18.5Z" stroke="currentColor" stroke-width="1.5"></path>
+		</svg>
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Navigation & empty states
+
+// PagerLink is a prev/next navigation item; empty Href disables it.
+type PagerLink struct {
+	Label string
+	Href  string
+}
+
+templ Pager(prev, next PagerLink, ariaLabel string) {
+	<nav aria-label={ ariaLabel } class="flex items-center justify-between gap-3">
+		if prev.Href != "" {
+			<a href={ prev.Href } class="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-300 ring-1 ring-white/10 transition ring-inset hover:bg-white/5 hover:text-white">
+				<span aria-hidden="true">←</span>
+				<span class="hidden sm:inline">{ prev.Label }</span>
+				<span class="sm:hidden">Prev</span>
+			</a>
+		} else {
+			<span class="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600">
+				<span aria-hidden="true">←</span>
+				<span class="hidden sm:inline">{ prev.Label }</span>
+				<span class="sm:hidden">Prev</span>
+			</span>
+		}
+		if next.Href != "" {
+			<a href={ next.Href } class="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-300 ring-1 ring-white/10 transition ring-inset hover:bg-white/5 hover:text-white">
+				<span class="hidden sm:inline">{ next.Label }</span>
+				<span class="sm:hidden">Next</span>
+				<span aria-hidden="true">→</span>
+			</a>
+		} else {
+			<span class="inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-zinc-600">
+				<span class="hidden sm:inline">{ next.Label }</span>
+				<span class="sm:hidden">Next</span>
+				<span aria-hidden="true">→</span>
+			</span>
+		}
+	</nav>
+}
+
+templ EmptyState(title, text, linkHref, linkLabel string) {
+	<div class="flex flex-col items-center gap-4 rounded-2xl bg-night-900/60 px-6 py-16 text-center ring-1 ring-white/5 ring-inset">
+		@GemMark("h-12 w-12 opacity-60")
+		<div class="space-y-1.5">
+			<h2 class="font-display text-lg font-bold text-white">{ title }</h2>
+			<p class="mx-auto max-w-md text-sm text-zinc-500">{ text }</p>
+		</div>
+		if linkHref != "" {
+			<a href={ linkHref } class={ ButtonClass("secondary", "", "") }>{ linkLabel }</a>
+		}
+	</div>
 }

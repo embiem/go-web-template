@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/embiem/go-web-template/data"
+	"github.com/embiem/indie-game-gems/data"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -53,5 +53,8 @@ func Init() error {
 }
 
 func Teardown() {
+	if Pool == nil {
+		return
+	}
 	Pool.Close()
 }

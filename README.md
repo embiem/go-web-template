@@ -1,100 +1,176 @@
-# Go Web Template
+# Indie Game Gems
 
-This is my (embiem's) favorite Go web stack at the time of making.
+A small, curated site for discovering great indie games outside the big-store
+algorithm: one hand-picked **Game of the Day**, a **Weekly Release Radar**,
+**Top of the Month**, per-game and per-developer pages with one-click store
+buttons (Steam, GOG, Epic, itch.io, Humble, direct), and a weekly **email
+newsletter**.
 
-I use this to start new web projects quickly and will likely change this template over time.
+Server-rendered with Go ([chi](https://github.com/go-chi/chi),
+[templ](https://templ.guide)), PostgreSQL via [sqlc](https://sqlc.dev), Tailwind
+CSS v4, and a little htmx. Content is curated with the `gems` CLI (cobra) and
+enriched from the public Steam store API and IGDB.
 
-## Note on Security
+## Features
 
-The simple password auth in this template is just to get going and should be replaced with a more secure approach or additional best practices, before going to production. Always reference the [OWASP Top 10](https://owasp.org/www-project-top-ten/) list to ensure you're building a secure app.
+- **Game of the Day** — an editorially picked game per date, with a note
+  (`/game-of-the-day`, archives by date).
+- **Weekly Release Radar** — games released in a given ISO week
+  (`/release-radar`, `/release-radar/{week}`).
+- **Top of the Month** — best games of a month by gem score (`/top`,
+  `/top/{year}/{month}`).
+- **Game & developer pages** — descriptions, screenshots/trailer, tags, store
+  buttons, "more from this developer" (`/games/{slug}`, `/developers/{slug}`).
+- **Newsletter** — double opt-in signup, markdown-authored weekly issues with
+  `{{gotd}}/{{radar}}/{{top}}/{{game}}` data directives, resumable sending,
+  web archive, one-click unsubscribe.
+- **Sitemap, robots.txt, RSS feed** (`/sitemap.xml`, `/robots.txt`,
+  `/feed.xml`).
+- **Curation CLI** — `gems` (see below) imports, syncs and schedules
+  everything; safe to re-run.
 
-## Prerequisites
+## Quick start
 
-- install Go (version 1.23.1)
-- install [migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
-  - example... check releases page: `curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar xvz`
-- install [sqlc](https://docs.sqlc.dev/en/stable/overview/install.html)
-  - `go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`
-- install [air](https://github.com/air-verse/air#installation)
-  - `go install github.com/air-verse/air@latest`
-- install [templ](https://templ.guide/quick-start/installation)
-  - `go install github.com/a-h/templ/cmd/templ@latest`
-- install [tailwindcss-cli](https://tailwindcss.com/blog/standalone-cli) v4.1.11
-  - example... check releases page: `curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.11/tailwindcss-linux-x64 && chmod +x tailwindcss-linux-x64 && mv tailwindcss-linux-x64 tailwindcss`
-- `cp .env.example .env` & fill-in any missing env vars
-- spin-up local dev services like db: `docker compose up -d`
+Prerequisites: Go 1.25+, Docker, and (for templ/sqlc/migrations work)
+[templ](https://templ.guide), [sqlc](https://docs.sqlc.dev),
+[golang-migrate](https://github.com/golang-migrate/migrate), [air](https://github.com/air-verse/air)
+and the Tailwind standalone CLI.
 
-## Local dev
-
-- run local dev setup via `air`
-- run tests via `go test ./...`
-
-## DB
-
-Using golang-migrate for migrations ([Tutorial](https://github.com/golang-migrate/migrate/blob/master/database/postgres/TUTORIAL.md)) and sqlc for queries, mutations & codegen ([Tutorial](https://docs.sqlc.dev/en/stable/tutorials/getting-started-postgresql.html)).
-
-[sqlc doc](https://docs.sqlc.dev/en/stable/howto/ddl.html) about handling SQL migrations.
-
-### Migrations
-
-For local dev, setup env var like so: `export POSTGRESQL_URL='postgres://postgres:password@localhost:5432/postgres?sslmode=disable'`.
-
-Optionally, test migrations up & down on a separate local db instance e.g. by spinning up a stack with different name: `docker compose -p dbmigrations-testing up -d`.
-
-1. Create Migration files: `migrate create -ext sql -dir db/migrations -seq your_migration_description`
-2. Write the migrations in the created up & down files using SQL
-3. Run up migrations: `migrate -database ${POSTGRESQL_URL} -path db/migrations up`
-4. Check db & run down migrations to test they work as well: `migrate -database ${POSTGRESQL_URL} -path db/migrations down` & check db as well
-5. run up migrations again
-
-When dirty, force db to a version reflecting it's real state: `migrate -database ${POSTGRESQL_URL} -path db/migrations force VERSION`
-
-Important: Write migration SQL in transactions. In Postgres, when we want our queries to be done in a transaction, we need to wrap it with `BEGIN` and `COMMIT` commands. Example:
-
-```sql
--- up migration
-BEGIN;
-
-CREATE TYPE enum_mood AS ENUM (
- 'happy',
- 'sad',
- 'neutral'
-);
-ALTER TABLE users ADD COLUMN mood enum_mood;
-
-COMMIT;
+```bash
+cp .env.example .env            # defaults work for local dev
+docker compose up -d            # Postgres 16, Adminer (:8080), Mailpit (:8025)
+go run ./cmd/gems seed seed/games.yaml   # import the curated seed (idempotent)
+go run ./cmd/gems steam sync --all       # descriptions + review stats from Steam
+go run ./cmd/gems media fetch --all      # cache images into ./media
+go run ./cmd/gems pick auto --days 14    # schedule the next two weeks of picks
+air                              # dev server on :3000 (see .air.toml)
 ```
 
-```sql
--- down migration
-BEGIN;
+Migrations run automatically on server/CLI start (`db.Init()` applies
+`db/migrations`). Tests: `go test ./...` (hermetic — no DB needed).
 
-ALTER TABLE users DROP COLUMN mood;
-DROP TYPE enum_mood;
+## Curation workflow (`gems` CLI)
 
-COMMIT;
+```bash
+go run ./cmd/gems steam releases --from 2026-09-28 --to 2026-10-04
+                                        # every indie Steam game released in the range
+                                        # -> tmp/steam-releases-<from>_<to>.json (no DB needed)
+go run ./cmd/gems games add --steam 1145360 --slug hades --editorial 95
+                                        # create a game from Steam data
+go run ./cmd/gems steam sync --all      # Steam: description, reviews, release
+go run ./cmd/gems igdb sync --all       # IGDB: trailer, store links, companies
+go run ./cmd/gems igdb catalogue supergiant-games   # add a developer's other games
+go run ./cmd/gems media fetch --all [--force]       # cache images locally
+go run ./cmd/gems link set hades gog https://www.gog.com/game/hades
+go run ./cmd/gems pick set 2026-10-01 hades --note "Why we love it"
+go run ./cmd/gems pick auto --days 7    # fill empty days, avoiding recent repeats
+go run ./cmd/gems pick list [--from YYYY-MM-DD --to YYYY-MM-DD]
+go run ./cmd/gems games list            # inventory
+go run ./cmd/gems rescore               # recompute all gem scores
+go run ./cmd/gems refresh               # cron bundle: steam + igdb + missing media
 ```
 
-### Queries, Mutations & Codegen
+`seed/games.yaml` is the curated source of truth (developers, games, tags,
+store links, editorial scores). Re-run `gems seed seed/games.yaml` any time —
+seed owns the curated fields and never wipes importer-owned data.
 
-Write the SQL queries & mutations in `db/query.sql` and then run `sqlc generate`.
+`gems steam releases` is the discovery step: it walks Steam's store search
+(released games newest-first, plus the coming-soon listing for future dates),
+keeps games with an exact release date inside `--from..--to` (default `--to`:
+today, UTC) and English support, then adds store details, the top user tags
+and the store page's review score from Steam's batched `GetItems` API (100
+games per request, about 10 seconds for a week of indie releases).
+`--indie=false` drops the Indie-tag filter, `--details=false` writes only
+appid/name/date, `--out -` prints to stdout. Pick candidates from the JSON and
+import them with `gems games add --steam <appid>`.
 
-## Templ / View / UI
+**IGDB access**: `gems igdb *` needs `IGDB_CLIENT_ID` / `IGDB_CLIENT_SECRET`
+from a Confidential [Twitch dev console](https://dev.twitch.tv/console/apps)
+app (IGDB is free for non-commercial use). Without them everything else works;
+`igdb` commands fail with a clear message.
 
-Using Templ: [https://templ.guide/quick-start/creating-a-simple-templ-component](https://templ.guide/quick-start/creating-a-simple-templ-component)
+**Cron**: run `gems refresh` periodically (plus `gems newsletter send` on
+publish day). In Docker: `docker compose run --rm app /gems refresh`.
 
-- `templ generate` to generate go files after adding or editing .templ files
+## Newsletter workflow
 
-## Optimizations
+```bash
+go run ./cmd/gems newsletter new --week 2026-W40          # scaffold from template
+$EDITOR newsletter/issues/2026-w40.md                      # edit markdown
+go run ./cmd/gems newsletter preview newsletter/issues/2026-w40.md [--text]
+go run ./cmd/gems newsletter test newsletter/issues/2026-w40.md --to you@example.com
+go run ./cmd/gems newsletter send newsletter/issues/2026-w40.md --yes
+go run ./cmd/gems newsletter subscribers list|count
+go run ./cmd/gems newsletter issues
+```
 
-Here is a list of tips to optimize the loading times.
+An issue is markdown with YAML front matter (`subject`, `preheader`), prose,
+and **block directives on their own lines**:
 
-1. Only include the JS that's needed. If a page doesn't need any JS, don't include it.
-2. Include any external JS scripts with the `defer` attribute.
-3. Preload pages e.g. on hover via [htmx preload extension](https://htmx.org/extensions/preload/)
-4. Use a CDN to serve assets & ideally pre-rendered HTML pages as well
-5. Cache assets as well as pages as much as possible
-6. Add links to needed assets like images or fonts with a `rel="preload"` attribute to the head.
-7. Add links to other domains like your CDN with a `rel="dns-prefetch"` attribute to the head.
-8. Defer non-critical CSS ([web.dev guide](https://web.dev/articles/defer-non-critical-css#optimize)): Include all necessary CSS for a page in the HTML on first load. Defer the load of the general CSS file that covers other pages/non-critical css.
-9. Make use of [image sprites](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_images/Implementing_image_sprites_in_CSS), e.g. if loading many thumbnails of same size, to reduce amount of requests & re-renders.
+| Directive | Meaning |
+|---|---|
+| `{{gotd 2026-09-28}}` | Game of the Day for that date (default: today) |
+| `{{radar 2026-W40}}` | releases of the given ISO week |
+| `{{top 2026-09}}` | best games of the given month |
+| `{{game hades}}` | a single game card with store buttons |
+
+Rendering resolves directives against the DB, produces a table-based HTML
+email plus a plain-text alternative, and snapshots the issue into the web
+archive. Sending is resumable — re-running `send` only mails pending
+deliveries — and delivery rows are claimed atomically (claimed with
+`FOR UPDATE SKIP LOCKED`), so concurrent send runs never double-send; a run
+that crashes mid-mail is resumed by the next run after a 10-minute claim
+timeout. The snapshot freezes once the first delivery row exists. Local dev
+sends through Mailpit (UI at `:8025`).
+
+## Gem score
+
+`gem_score` blends editorial curation with Steam review sentiment into a 0–100
+number (see `catalog/scoring.go`). Steam's review percentage only counts once
+a game has at least 50 reviews; its influence then ramps linearly up to full
+weight at 10,000 reviews. The blend is 60% editorial / 40% Steam; with no
+usable Steam data the editorial score stands alone, and with no editorial
+score the Steam percentage stands alone (a game with neither stays unscored).
+Scores are recomputed by `gems seed`, `gems steam sync` and `gems rescore`.
+
+## Environment variables
+
+All in `.env.example`; copy to `.env`.
+
+| Variable | Meaning |
+|---|---|
+| `DATABASE_URL` | Postgres connection string (app + CLI) |
+| `PORT` | HTTP port (default `3000`) |
+| `APP_ENV` | `development` (text logs) or `production` (JSON logs, HSTS) |
+| `MEDIA_DIR` | Local media cache root, default `media` (gitignored) |
+| `MEDIA_BASE_URL` | Public prefix for media URLs, default `/media`; point at a CDN to switch |
+| `POSTGRES_PORT` | Host port for the compose `db` service (default `5432`) |
+| `POSTGRES_PASSWORD` | Compose db + prod-app database password (only needed on first db init / by the app container) |
+| `BASE_URL` | Public site origin; links/emails are absolute against it |
+| `SMTP_HOST/PORT/USERNAME/PASSWORD/TLS` | SMTP relay for newsletter mail; defaults target the Mailpit dev sink (`SMTP_TLS`: `none`/`starttls`/`tls`) |
+| `SMTP_RATE_PER_SEC` | Max mails per second when sending |
+| `MAIL_FROM`, `MAIL_REPLY_TO`, `MAIL_POSTAL_ADDRESS` | Sender identity + imprint footer |
+| `NEWSLETTER_SECRET` | HMAC key for one-click unsubscribe links — rotate = links invalidated (confirm links use random tokens stored hashed) |
+| `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Optional; Twitch app credentials for IGDB |
+
+## Deployment
+
+`docker compose --profile prod up -d app` builds and runs the production
+image: a two-stage build that compiles the web server **and** the `gems` CLI,
+regenerates CSS with the pinned Tailwind CLI, and runs as non-root. The app
+service gets its database URL from `POSTGRES_PASSWORD` against the `db`
+service; `MEDIA_DIR` is a writable volume (`media_data:/data/media`) — never
+baked into the image. Cron/one-off jobs use the same image:
+
+```bash
+docker compose run --rm app /gems refresh
+docker compose run --rm app /gems pick auto --days 14
+```
+
+## Data sources & attribution
+
+Game metadata, descriptions, review statistics and imagery come from the
+public Steam store (Valve) and [IGDB](https://www.igdb.com) (Twitch; free for
+non-commercial use under their terms). Images are cached locally and served
+from this site's own `/media` origin. All games link back to their store
+pages; trademarks belong to their respective owners.

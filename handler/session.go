@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/embiem/go-web-template/data"
-	"github.com/embiem/go-web-template/db"
+	"github.com/embiem/indie-game-gems/data"
+	"github.com/embiem/indie-game-gems/db"
 
 	"github.com/alexedwards/scs/pgxstore"
 	"github.com/alexedwards/scs/v2"

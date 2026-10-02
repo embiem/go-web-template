@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/embiem/go-web-template/db"
-	"github.com/embiem/go-web-template/handler"
-	"github.com/embiem/go-web-template/util"
+	"github.com/embiem/indie-game-gems/db"
+	"github.com/embiem/indie-game-gems/handler"
+	"github.com/embiem/indie-game-gems/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
@@ -48,6 +48,7 @@ func main() {
 
 	// Middleware stack
 	router.Use(middleware.RequestID)
+	router.Use(middleware.GetHead)
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Heartbeat("/healthz"))
 	router.Use(util.RequestLogger)
@@ -57,11 +58,31 @@ func main() {
 	router.Use(util.SecurityHeaders(isProd))
 	router.Use(util.SameOriginOnly)
 
-	router.Get("/", handler.Make(handler.GetIndexPage))
+	router.NotFound(handler.Make(handler.GetNotFoundPage))
+
+	// Public game discovery pages: cacheable at the edge for 5 minutes.
+	// Home is as public and session-free as the rest of the group.
+	pages := router.With(handler.CacheControl("public, max-age=300"))
+	pages.Get("/", handler.Make(handler.GetHomePage))
+	pages.Get("/games/{slug}", handler.Make(handler.GetGamePage))
+	pages.Get("/developers/{slug}", handler.Make(handler.GetDeveloperPage))
+	pages.Get("/game-of-the-day", handler.Make(handler.GetGameOfTheDayPage))
+	pages.Get("/game-of-the-day/{date}", handler.Make(handler.GetGameOfTheDayDatePage))
+	pages.Get("/release-radar", handler.Make(handler.GetReleaseRadarPage))
+	pages.Get("/release-radar/{week}", handler.Make(handler.GetReleaseRadarWeekPage))
+	pages.Get("/top", handler.Make(handler.GetTopPage))
+	pages.Get("/top/{year}/{month}", handler.Make(handler.GetTopMonthPage))
+	pages.Get("/sitemap.xml", handler.Make(handler.GetSitemap))
+	pages.Get("/robots.txt", handler.Make(handler.GetRobots))
+	pages.Get("/feed.xml", handler.Make(handler.GetFeed))
 
 	// Auth Routes
-	router.Get("/signup", handler.Make(handler.GetSignupPage))
 	router.Get("/login", handler.Make(handler.GetLoginPage))
+	// Public signup is disabled for now. Login/logout, the signup handlers
+	// and views, and the users/accounts tables are intentionally kept (not
+	// dead code): user accounts will be needed for favourites. Re-register
+	// the routes here when signup should go live:
+	//   router.Get("/signup", handler.Make(handler.GetSignupPage))
 
 	// Throttle credential submission per IP, and per account so that
 	// credential stuffing spread across many IPs still hits a wall. The
@@ -70,15 +91,38 @@ func main() {
 	router.Group(func(r chi.Router) {
 		r.Use(httprate.LimitBy(20, time.Minute, keyByIP))
 		r.Use(httprate.LimitBy(10, time.Minute, keyByUsername))
-		r.Post("/signup", handler.Make(handler.PostSignup))
+		// r.Post("/signup", handler.Make(handler.PostSignup)) // see note above
 		r.Post("/login", handler.Make(handler.PostLogin))
 	})
 
 	router.Post("/logout", handler.Make(handler.PostLogout))
 
+	// Newsletter: public signup (double opt-in), confirmation, one-click
+	// unsubscribe and the sent-issue archive. Subscribe is throttled per IP;
+	// confirmation re-sends are additionally throttled per address in the
+	// handler. The one-click unsubscribe POST (RFC 8058) intentionally has
+	// no CSRF/Origin dependency — see PostNewsletterUnsubscribe.
+	router.Get("/newsletter", handler.Make(handler.GetNewsletterPage))
+	router.Get("/newsletter/issues/{slug}", handler.Make(handler.GetNewsletterIssuePage))
+	router.Get("/newsletter/confirm", handler.Make(handler.GetNewsletterConfirm))
+	router.Post("/newsletter/confirm", handler.Make(handler.PostNewsletterConfirm))
+	router.Get("/newsletter/unsubscribe/{token}", handler.Make(handler.GetNewsletterUnsubscribe))
+	router.Post("/newsletter/unsubscribe/{token}", handler.Make(handler.PostNewsletterUnsubscribe))
+	router.Group(func(r chi.Router) {
+		r.Use(httprate.LimitBy(10, time.Minute, keyByIP))
+		r.Post("/newsletter/subscribe", handler.Make(handler.PostNewsletterSubscribe))
+	})
+
 	// Static files
 	filesDir := http.Dir("public")
-	fileServer(router, "/public", filesDir)
+	fileServer(router, "/public", filesDir, "public, max-age=3600")
+
+	// Locally cached game media (keys like "games/hades/header.jpg"), served
+	// from the media cache root. Long immutable caching: keys are
+	// content-addressed by filename convention; new versions get new keys.
+	if mediaDir := getenv("MEDIA_DIR", "media"); mediaDir != "" {
+		fileServer(router, "/media", http.Dir(mediaDir), "public, max-age=31536000, immutable")
+	}
 
 	// Configure the HTTP server with sane timeouts
 	addr := ":" + getenv("PORT", "3000")
@@ -112,30 +156,7 @@ func main() {
 	}
 }
 
-type cacheOnSuccessWriter struct {
-	http.ResponseWriter
-	cacheControl string
-	wroteHeader  bool
-}
-
-func (w *cacheOnSuccessWriter) WriteHeader(status int) {
-	if !w.wroteHeader {
-		w.wroteHeader = true
-		if status < http.StatusBadRequest {
-			w.Header().Set("Cache-Control", w.cacheControl)
-		}
-	}
-	w.ResponseWriter.WriteHeader(status)
-}
-
-func (w *cacheOnSuccessWriter) Write(b []byte) (int, error) {
-	if !w.wroteHeader {
-		w.WriteHeader(http.StatusOK)
-	}
-	return w.ResponseWriter.Write(b)
-}
-
-func fileServer(r chi.Router, path string, root http.FileSystem) {
+func fileServer(r chi.Router, path string, root http.FileSystem, cacheControl string) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit any URL parameters.")
 	}
@@ -146,12 +167,11 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	}
 	path += "*"
 
-	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+	r.With(handler.CacheControl(cacheControl)).Get(path, func(w http.ResponseWriter, r *http.Request) {
 		rctx := chi.RouteContext(r.Context())
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
-		cw := &cacheOnSuccessWriter{ResponseWriter: w, cacheControl: "public, max-age=3600"}
 		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
-		fs.ServeHTTP(cw, r)
+		fs.ServeHTTP(w, r)
 	})
 }
 

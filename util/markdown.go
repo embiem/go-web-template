@@ -18,11 +18,41 @@ func MdToHTML(md string) string {
 	p := parser.NewWithExtensions(extensions)
 	doc := p.Parse([]byte(md))
 
-	// create HTML renderer with extensions
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	// create HTML renderer with extensions. SkipHTML drops raw HTML
+	// blocks/inline tags completely: descriptions are third-party content
+	// (Steam/IGDB), so no raw HTML may pass through into the page. Safelink
+	// restricts link targets to http(s)/mailto/relative — no javascript: or
+	// data: hrefs from third-party markdown (also protects the RSS feed,
+	// which has no CSP).
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank | html.SkipHTML |
+		html.Safelink | html.NoopenerLinks | html.NoreferrerLinks
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 
-	// Remove any newlines that interfere with e.g. SSE streaming
-	return strings.ReplaceAll(string(markdown.Render(doc, renderer)), "\n", "")
+	return string(markdown.Render(doc, renderer))
+}
+
+// DescriptionPreview splits third-party markdown at a paragraph boundary
+// ("\n\n") for the game page's collapsed description preview. Steam
+// descriptions often open with DLC/update heading promos, so leading headings
+// are skipped and up to keepParas paragraphs are shown instead. Headings that
+// were skipped stay at the front of `rest` so nothing is dropped.
+func DescriptionPreview(md string, keepParas int) (intro, rest string) {
+	blocks := strings.Split(strings.TrimSpace(md), "\n\n")
+	i := 0
+	for i < len(blocks) && strings.HasPrefix(blocks[i], "#") {
+		i++
+	}
+	if i == len(blocks) {
+		return strings.TrimSpace(md), ""
+	}
+	paras := 0
+	j := i
+	for j < len(blocks) && paras < keepParas {
+		if !strings.HasPrefix(blocks[j], "#") {
+			paras++
+		}
+		j++
+	}
+	return strings.Join(blocks[i:j], "\n\n"), strings.TrimSpace(strings.Join(blocks[:i], "\n\n") + "\n\n" + strings.Join(blocks[j:], "\n\n"))
 }

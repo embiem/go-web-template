@@ -1,0 +1,710 @@
+# Curated seed data for Indie Game Gems.
+#
+# Steam app ids were checked against
+# https://store.steampowered.com/api/appdetails?appids=<ID>&cc=us&l=en
+# (name, developers, release_date) in October 2026.
+#
+# Store links are only present when the target page was verified to resolve to
+# that game's page (HTTP 200 at a specific store URL, not a store landing page).
+# Epic Games Store and itch.io are behind Cloudflare and cannot be fetched
+# directly; those two links were taken from the PCGamingWiki availability table
+# and are marked "# verified via PCGamingWiki".
+# Social links were verified via the X profile page and the Bluesky public API.
+developers:
+  - slug: supergiant-games
+    name: Supergiant Games
+    website_url: https://www.supergiantgames.com
+    bio: >-
+      A San Francisco studio founded in 2009, known for pairing tightly designed
+      action with striking art and music. Its games — from Bastion to Hades — are
+      built by a deliberately small team.
+    socials:
+      x: https://x.com/SupergiantGames
+      bluesky: https://bsky.app/profile/supergiantgames.bsky.social
+  - slug: playdead
+    name: Playdead
+    website_url: https://playdead.com
+    bio: >-
+      A Danish studio whose wordless, monochrome platformers Limbo and Inside set
+      a high bar for atmosphere and restraint.
+    socials:
+      x: https://x.com/Playdead
+  - slug: subset-games
+    name: Subset Games
+    bio: >-
+      A tiny two-person studio behind the strategy classics FTL and Into the
+      Breach, both celebrated for their depth and elegance.
+    socials:
+      x: https://x.com/subsetgames
+  - slug: team-cherry
+    name: Team Cherry
+    website_url: https://www.teamcherry.com.au
+    bio: >-
+      An Adelaide studio of just a few people that created Hollow Knight and its
+      follow-up Silksong, hand-crafting intricate metroidvania worlds.
+    socials:
+      x: https://x.com/TeamCherryGames
+      bluesky: https://bsky.app/profile/teamcherry.bsky.social
+  - slug: re-logic
+    name: Re-Logic
+    website_url: https://re-logic.com
+    bio: >-
+      The small independent team behind Terraria, which it has supported with
+      free updates for well over a decade.
+    socials:
+      x: https://x.com/ReLogicGames
+  - slug: lucas-pope
+    name: Lucas Pope
+    website_url: https://dukope.com
+    bio: >-
+      A solo developer known for design-driven puzzle games such as Papers,
+      Please and Return of the Obra Dinn. Publishes under the 3909 label.
+    socials:
+      x: https://x.com/dukope
+  - slug: 3909-llc
+    name: 3909 LLC
+    bio: >-
+      The studio label Lucas Pope uses to publish his own games.
+  - slug: toby-fox
+    name: Toby Fox
+    website_url: https://undertale.com
+    bio: >-
+      A composer-turned-developer whose debut Undertale became one of the most
+      influential indie RPGs ever made.
+    socials:
+      x: https://x.com/tobyfox
+  - slug: concernedape
+    name: ConcernedApe
+    website_url: https://www.stardewvalley.net
+    bio: >-
+      The solo project of Eric Barone, who wrote, drew, composed and coded
+      Stardew Valley over several years.
+    socials:
+      x: https://x.com/ConcernedApe
+      bluesky: https://bsky.app/profile/concernedape.bsky.social
+  - slug: extremely-ok-games
+    name: Extremely OK Games
+    website_url: https://exok.com
+    bio: >-
+      The Vancouver studio (formerly Maddy Makes Games) behind Celeste, focused
+      on precise platformers with a human touch.
+    socials:
+      x: https://x.com/exok_games
+  - slug: motion-twin
+    name: Motion Twin
+    website_url: https://motiontwin.com
+    bio: >-
+      A worker-owned French co-operative that created the roguelite action game
+      Dead Cells.
+    socials:
+      x: https://x.com/motiontwin
+      bluesky: https://bsky.app/profile/motiontwin.com
+  - slug: mega-crit
+    name: Mega Crit
+    website_url: https://www.megacrit.com
+    bio: >-
+      The studio behind Slay the Spire, the deckbuilding roguelike that helped
+      define a genre.
+    socials:
+      x: https://x.com/MegaCrit
+      bluesky: https://bsky.app/profile/megacrit.com
+  - slug: mobius-digital
+    name: Mobius Digital
+    website_url: https://www.mobiusdigitalgames.com
+    bio: >-
+      A Los Angeles studio that built Outer Wilds, an open-ended mystery about a
+      clockwork solar system.
+  - slug: annapurna-interactive
+    name: Annapurna Interactive
+    bio: >-
+      An independent publisher known for backing distinctive, authored games
+      such as Outer Wilds.
+  - slug: za-um
+    name: ZA/UM
+    website_url: https://zaumstudio.com
+    bio: >-
+      The studio behind Disco Elysium, a role-playing game celebrated for its
+      writing and ambition.
+    socials:
+      x: https://x.com/zaum_studio
+      bluesky: https://bsky.app/profile/zaumstudio.bsky.social
+  - slug: poncle
+    name: poncle
+    website_url: https://poncle.games
+    bio: >-
+      Developer of Vampire Survivors, the modest project that grew into a
+      genre-defining hit.
+    socials:
+      x: https://x.com/poncle_games
+      bluesky: https://bsky.app/profile/poncle.games
+  - slug: localthunk
+    name: LocalThunk
+    website_url: https://localthunk.com
+    bio: >-
+      A solo developer whose poker-flavoured roguelike Balatro became a breakout
+      success.
+    socials:
+      x: https://x.com/LocalThunk
+      bluesky: https://bsky.app/profile/localthunk.com
+  - slug: playstack
+    name: Playstack
+    website_url: https://www.playstack.com
+    bio: >-
+      A London-based publisher that backs indie titles such as Balatro.
+    socials:
+      x: https://x.com/PlaystackGames
+  - slug: number-none
+    name: Number None
+    bio: >-
+      Jonathan Blow's studio, responsible for the time-bending platformer Braid.
+  - slug: iron-gate
+    name: Iron Gate
+    website_url: https://irongate.se
+    bio: >-
+      A small Swedish studio that created the viking survival game Valheim.
+    socials:
+      x: https://x.com/IronGateStudio
+  - slug: coffee-stain-publishing
+    name: Coffee Stain Publishing
+    bio: >-
+      The publishing arm of Coffee Stain, supporting independent developers such
+      as Iron Gate.
+    socials:
+      x: https://x.com/Coffee_Stain
+  - slug: dazed-games
+    name: Dazed Games
+    bio: >-
+      A small studio behind the laid-back fishing game How to Fish.
+  - slug: opneon-games
+    name: OPNeon Games
+    bio: >-
+      Developer of the retail simulation TCG Card Shop Simulator.
+    socials:
+      x: https://x.com/OPNeonGames
+  - slug: hovgaard-games
+    name: Hovgaard Games
+    website_url: https://www.hovgaard.com
+    bio: >-
+      A Danish indie studio specialising in business and management simulations
+      such as Big Ambitions.
+    socials:
+      x: https://x.com/hovgaardgames
+  - slug: something-we-made
+    name: Something We Made
+    website_url: https://www.somethingwemade.com
+    bio: >-
+      The Swedish studio behind the photography adventure TOEM and its sequel.
+    socials:
+      x: https://x.com/somethingwemade
+  - slug: d5-copperhead
+    name: D5 Copperhead
+    bio: >-
+      Developer of the automation game Alchemy Factory.
+games:
+  - slug: braid
+    title: Braid
+    steam_appid: 26800
+    release_date: 2009-04-10
+    release_status: released
+    developers: [number-none]
+    publishers: [number-none]
+    tags: [platformer, puzzle, atmospheric, retro]
+    tagline: "Rewind time to solve a platformer that rewrote the rules."
+    editorial_score: 88
+    gem_note: >-
+      Braid pairs hand-painted backdrops with a time-manipulation mechanic that
+      turns every level into a riddle. It helped prove that small, personal games
+      could be both artistic and commercially viable. Two decades on, its
+      melancholic mood and clever design still hold up.
+    store_links:
+      steam: https://store.steampowered.com/app/26800/
+      gog: https://www.gog.com/en/game/braid
+      humble: https://www.humblebundle.com/store/braid
+  - slug: limbo
+    title: Limbo
+    steam_appid: 48000
+    release_date: 2011-08-02
+    release_status: released
+    developers: [playdead]
+    publishers: [playdead]
+    tags: [platformer, puzzle, atmospheric, dark]
+    tagline: "A boy searches a monochrome forest for his sister."
+    editorial_score: 86
+    gem_note: >-
+      Limbo's silhouetted art and wordless storytelling make dread feel elegant.
+      Its physics puzzles reward patience and observation rather than reflexes.
+      A short, unforgettable masterclass in atmosphere.
+    store_links:
+      steam: https://store.steampowered.com/app/48000/
+      epic: https://store.epicgames.com/en-US/p/limbo  # verified via PCGamingWiki
+      itch: https://playdead.itch.io/limbo  # verified via PCGamingWiki
+  - slug: terraria
+    title: Terraria
+    steam_appid: 105600
+    release_date: 2011-05-16
+    release_status: released
+    developers: [re-logic]
+    publishers: [re-logic]
+    tags: [sandbox, survival, crafting, adventure, platformer]
+    tagline: "Dig, build and fight through a vast generated world."
+    editorial_score: 94
+    gem_note: >-
+      Terraria packs an absurd amount of exploration, crafting and boss-hunting
+      into a 2D sandbox. Nearly every update since launch has been free, and the
+      community keeps it alive. One of the best value propositions in PC gaming.
+    store_links:
+      steam: https://store.steampowered.com/app/105600/
+      gog: https://www.gog.com/en/game/terraria
+      humble: https://www.humblebundle.com/store/terraria
+  - slug: bastion
+    title: Bastion
+    steam_appid: 107100
+    release_date: 2011-08-16
+    release_status: released
+    developers: [supergiant-games]
+    publishers: [supergiant-games]
+    tags: [action, rpg, narrative, hack-and-slash]
+    tagline: "Rebuild a shattered world while a narrator tells your tale."
+    editorial_score: 88
+    gem_note: >-
+      Bastion announced Supergiant's knack for fusing tight combat with reactive
+      narration. The Kid's journey unfolds through a gravelly voice that reacts
+      to everything you do. Colourful, melodic and tightly paced.
+    store_links:
+      steam: https://store.steampowered.com/app/107100/
+      gog: https://www.gog.com/en/game/bastion
+      humble: https://www.humblebundle.com/store/bastion
+      itch: https://supergiant-games.itch.io/bastion  # verified via PCGamingWiki
+  - slug: ftl-faster-than-light
+    title: "FTL: Faster Than Light"
+    steam_appid: 212680
+    release_date: 2012-09-14
+    release_status: released
+    developers: [subset-games]
+    publishers: [subset-games]
+    tags: [roguelike, strategy, space, simulation]
+    tagline: "Command a starship on a doomed voyage across the galaxy."
+    editorial_score: 92
+    gem_note: >-
+      FTL turns starship management into tense, pause-and-plan tactics. Every
+      jump risks your crew and your hull, and death is a lesson rather than a
+      wall. A landmark roguelike that still devours evenings.
+    store_links:
+      steam: https://store.steampowered.com/app/212680/
+      gog: https://www.gog.com/en/game/faster_than_light
+      humble: https://www.humblebundle.com/store/ftl-faster-than-light
+      epic: https://store.epicgames.com/en-US/p/faster-than-light  # verified via PCGamingWiki
+  - slug: papers-please
+    title: Papers, Please
+    steam_appid: 239030
+    release_date: 2013-08-08
+    release_status: released
+    developers: [lucas-pope]
+    publishers: [3909-llc]
+    tags: [simulation, narrative, puzzle, dystopian]
+    tagline: "Check documents at a border where every stamp matters."
+    editorial_score: 93
+    gem_note: >-
+      Papers, Please makes bureaucracy gripping by tying every approval to your
+      family's survival. Its stark pixel faces and grim choices linger long after
+      a shift ends. A rare game where the moral weight is the mechanic.
+    store_links:
+      steam: https://store.steampowered.com/app/239030/
+      gog: https://www.gog.com/en/game/papers_please
+      humble: https://www.humblebundle.com/store/papers-please
+  - slug: transistor
+    title: Transistor
+    steam_appid: 237930
+    release_date: 2014-05-20
+    release_status: released
+    developers: [supergiant-games]
+    publishers: [supergiant-games]
+    tags: [action, rpg, narrative, cyberpunk]
+    tagline: "Wield a talking sword in a gorgeous, melancholy city."
+    editorial_score: 89
+    gem_note: >-
+      Transistor layers a flexible pause-and-combo combat system over a haunting
+      world. Red's journey is short but soaked in atmosphere and music.
+      Supergiant's most poetic game.
+    store_links:
+      steam: https://store.steampowered.com/app/237930/
+      gog: https://www.gog.com/en/game/transistor
+      epic: https://store.epicgames.com/en-US/p/transistor  # verified via PCGamingWiki
+      itch: https://supergiant-games.itch.io/transistor  # verified via PCGamingWiki
+  - slug: undertale
+    title: Undertale
+    steam_appid: 391540
+    release_date: 2015-09-15
+    release_status: released
+    developers: [toby-fox]
+    publishers: [toby-fox]
+    tags: [rpg, narrative, pixel-art, comedy, story-rich]
+    tagline: "A quirky RPG where you can spare every enemy you meet."
+    editorial_score: 96
+    gem_note: >-
+      Undertale weaponises mercy, memory and the player's expectations to tell a
+      story that only works as a game. Its humour and characters are endlessly
+      quotable. The kind of debut that changes how people think about the medium.
+    store_links:
+      steam: https://store.steampowered.com/app/391540/
+      gog: https://www.gog.com/en/game/undertale
+      humble: https://www.humblebundle.com/store/undertale
+  - slug: stardew-valley
+    title: Stardew Valley
+    steam_appid: 413150
+    release_date: 2016-02-26
+    release_status: released
+    developers: [concernedape]
+    publishers: [concernedape]
+    tags: [farming, simulation, life-sim, pixel-art, crafting]
+    tagline: "Leave the office, inherit a farm, and build a life."
+    editorial_score: 96
+    gem_note: >-
+      Stardew Valley is a bottomless well of farming, friendships and small-town
+      secrets. Its unhurried loop lets you set your own goals season by season.
+      Made largely by one person, it became a comfort game for millions.
+    store_links:
+      steam: https://store.steampowered.com/app/413150/
+      gog: https://www.gog.com/en/game/stardew_valley
+  - slug: inside
+    title: Inside
+    steam_appid: 304430
+    release_date: 2016-07-07
+    release_status: released
+    developers: [playdead]
+    publishers: [playdead]
+    tags: [platformer, puzzle, atmospheric, dystopian]
+    tagline: "Escape a nightmarish facility in a wordless dystopia."
+    editorial_score: 90
+    gem_note: >-
+      Inside refines Playdead's formula into something colder and more precise.
+      Every puzzle and set piece edges you toward a finale nobody forgets.
+      Meticulous, unsettling and perfectly paced.
+    store_links:
+      steam: https://store.steampowered.com/app/304430/
+      epic: https://store.epicgames.com/en-US/p/inside  # verified via PCGamingWiki
+      itch: https://playdead.itch.io/inside  # verified via PCGamingWiki
+  - slug: hollow-knight
+    title: Hollow Knight
+    steam_appid: 367520
+    release_date: 2017-02-24
+    release_status: released
+    developers: [team-cherry]
+    publishers: [team-cherry]
+    tags: [metroidvania, action-adventure, platformer, atmospheric]
+    tagline: "Descend into a ruined bug kingdom and uncover its secrets."
+    editorial_score: 97
+    gem_note: >-
+      Hollow Knight is a hand-drawn metroidvania with combat, exploration and
+      lore in perfect balance. Its world is enormous yet coherent, and its bosses
+      are punishing but fair. A benchmark for the genre.
+    store_links:
+      steam: https://store.steampowered.com/app/367520/
+      gog: https://www.gog.com/en/game/hollow_knight
+      humble: https://www.humblebundle.com/store/hollow-knight
+  - slug: celeste
+    title: Celeste
+    steam_appid: 504230
+    release_date: 2018-01-25
+    release_status: released
+    developers: [extremely-ok-games]
+    publishers: [extremely-ok-games]
+    tags: [platformer, action, pixel-art, story-rich]
+    tagline: "Climb a mountain and confront your own anxieties."
+    editorial_score: 95
+    gem_note: >-
+      Celeste pairs razor-sharp platforming with a genuinely thoughtful story
+      about mental health. Its assist options make the challenge welcoming
+      without diluting it. Tight controls and a superb soundtrack seal the deal.
+    store_links:
+      steam: https://store.steampowered.com/app/504230/
+      epic: https://store.epicgames.com/en-US/p/celeste  # verified via PCGamingWiki
+      humble: https://www.humblebundle.com/store/celeste
+      itch: https://mattmakesgames.itch.io/celeste  # verified via PCGamingWiki
+  - slug: into-the-breach
+    title: Into the Breach
+    steam_appid: 590380
+    release_date: 2018-02-27
+    release_status: released
+    developers: [subset-games]
+    publishers: [subset-games]
+    tags: [strategy, tactics, turn-based, roguelite]
+    tagline: "Command mechs in perfect-information turn-based battles."
+    editorial_score: 92
+    gem_note: >-
+      Into the Breach shows you every enemy attack before it happens, then dares
+      you to find the perfect counter. Each run is a compact puzzle of positioning
+      and sacrifice. Subset's follow-up to FTL is ruthlessly elegant.
+    store_links:
+      steam: https://store.steampowered.com/app/590380/
+      gog: https://www.gog.com/en/game/into_the_breach
+      humble: https://www.humblebundle.com/store/into-the-breach
+      epic: https://store.epicgames.com/en-US/p/into-the-breach  # verified via PCGamingWiki
+  - slug: dead-cells
+    title: Dead Cells
+    steam_appid: 588650
+    release_date: 2018-08-06
+    release_status: released
+    developers: [motion-twin]
+    publishers: [motion-twin]
+    tags: [roguelite, metroidvania, action, platformer]
+    tagline: "Fight, die, and mutate your way through a shifting castle."
+    editorial_score: 91
+    gem_note: >-
+      Dead Cells blends fluid action with roguelite progression and a light
+      metroidvania structure. Combat feels immediate, and every death nudges you
+      a little further. Years of free updates kept it fresh.
+    store_links:
+      steam: https://store.steampowered.com/app/588650/
+      gog: https://www.gog.com/en/game/dead_cells
+      humble: https://www.humblebundle.com/store/dead-cells
+      epic: https://store.epicgames.com/en-US/p/dead-cells  # verified via PCGamingWiki
+      itch: https://plug-in-digital.itch.io/dead-cells  # verified via PCGamingWiki
+  - slug: return-of-the-obra-dinn
+    title: Return of the Obra Dinn
+    steam_appid: 653530
+    release_date: 2018-10-18
+    release_status: released
+    developers: [lucas-pope]
+    publishers: [3909-llc]
+    tags: [puzzle, mystery, narrative, first-person]
+    tagline: "Deduce the fate of a doomed ship's crew, one memory at a time."
+    editorial_score: 94
+    gem_note: >-
+      Return of the Obra Dinn is a detective game where you truly do the
+      deducing. Its monochrome dithered art and eerie sound design build a
+      singular mood. Solving the final identity feels like a genuine achievement.
+    store_links:
+      steam: https://store.steampowered.com/app/653530/
+      gog: https://www.gog.com/en/game/return_of_the_obra_dinn
+      humble: https://www.humblebundle.com/store/return-of-the-obra-dinn
+  - slug: slay-the-spire
+    title: Slay the Spire
+    steam_appid: 646570
+    release_date: 2019-01-23
+    release_status: released
+    developers: [mega-crit]
+    publishers: [mega-crit]
+    tags: [roguelike, deckbuilder, card-game, turn-based, strategy]
+    tagline: "Build a deck and climb a spire of monsters and choices."
+    editorial_score: 95
+    gem_note: >-
+      Slay the Spire turned deckbuilding into an endlessly replayable roguelike.
+      Every card pick, relic and path is a meaningful decision. It launched a
+      whole genre of imitators and remains the best of them.
+    store_links:
+      steam: https://store.steampowered.com/app/646570/
+      gog: https://www.gog.com/en/game/slay_the_spire
+      humble: https://www.humblebundle.com/store/slay-the-spire
+  - slug: outer-wilds
+    title: Outer Wilds
+    steam_appid: 753640
+    release_date: 2020-06-18
+    release_status: released
+    developers: [mobius-digital]
+    publishers: [annapurna-interactive]
+    tags: [exploration, mystery, space, narrative, open-world]
+    tagline: "Explore a solar system trapped in a 22-minute time loop."
+    editorial_score: 96
+    gem_note: >-
+      Outer Wilds is a game about curiosity: progress is knowledge, not
+      power-ups. Its clockwork solar system is a puzzle box you slowly learn to
+      read. Few games capture the wonder of discovery so purely.
+    store_links:
+      steam: https://store.steampowered.com/app/753640/
+      epic: https://store.epicgames.com/en-US/p/outerwilds  # verified via PCGamingWiki
+      humble: https://www.humblebundle.com/store/outer-wilds
+  - slug: disco-elysium
+    title: Disco Elysium
+    steam_appid: 632470
+    release_date: 2019-10-15
+    release_status: released
+    developers: [za-um]
+    publishers: [za-um]
+    tags: [rpg, narrative, mystery, story-rich]
+    tagline: "Play a broken detective whose own mind is the battleground."
+    editorial_score: 97
+    gem_note: >-
+      Disco Elysium replaces combat with conversation, ideology and
+      self-destruction. Its writing is extraordinary, and your skills argue with
+      you as much as the suspects do. A role-playing game that trusts words to
+      carry everything.
+    store_links:
+      steam: https://store.steampowered.com/app/632470/
+      gog: https://www.gog.com/en/game/disco_elysium
+      humble: https://www.humblebundle.com/store/disco-elysium-the-final-cut
+      epic: https://store.epicgames.com/en-US/p/disco-elysium  # verified via PCGamingWiki
+  - slug: hades
+    title: Hades
+    steam_appid: 1145360
+    igdb_slug: hades--1  # slug from PCGamingWiki infobox (igdb.com is Cloudflare-blocked)
+    release_date: 2020-09-17
+    release_status: released
+    developers: [supergiant-games]
+    publishers: [supergiant-games]
+    tags: [roguelike, action, hack-and-slash, narrative]
+    tagline: "Fight your way out of the Underworld, one doomed escape at a time."
+    editorial_score: 96
+    gem_note: >-
+      Hades makes dying part of the story, with a cast that reacts to every
+      failed escape. Its combat is fast and satisfying, and the boon system keeps
+      runs varied. Supergiant's best work to date.
+    store_links:
+      steam: https://store.steampowered.com/app/1145360/
+      epic: https://store.epicgames.com/en-US/p/hades  # verified via PCGamingWiki
+  - slug: vampire-survivors
+    title: Vampire Survivors
+    steam_appid: 1794680
+    release_date: 2022-10-20
+    release_status: released
+    developers: [poncle]
+    publishers: [poncle]
+    tags: [bullet-heaven, roguelite, action, arcade, survival]
+    tagline: "Survive swarms of monsters and snowball into a powerhouse."
+    editorial_score: 88
+    gem_note: >-
+      Vampire Survivors strips action down to movement and timing, then escalates
+      into glorious chaos. Runs are short and the progression hooks are
+      dangerously moreish. A cheap, absurdly fun phenomenon.
+    store_links:
+      steam: https://store.steampowered.com/app/1794680/
+      epic: https://store.epicgames.com/en-US/p/vampire-survivors-f699a1  # verified via PCGamingWiki
+  - slug: balatro
+    title: Balatro
+    steam_appid: 2379780
+    release_date: 2024-02-20
+    release_status: released
+    developers: [localthunk]
+    publishers: [playstack]
+    tags: [deckbuilder, roguelike, card-game, arcade]
+    tagline: "Bend poker hands into wildly broken scoring machines."
+    editorial_score: 94
+    gem_note: >-
+      Balatro takes poker and twists it into a compulsive deckbuilder where
+      synergy is everything. Each joker can redefine a run, and chasing a bigger
+      hand is hypnotic. One of the most addictive games of recent years.
+    store_links:
+      steam: https://store.steampowered.com/app/2379780/
+      humble: https://www.humblebundle.com/store/balatro
+  - slug: hollow-knight-silksong
+    title: "Hollow Knight: Silksong"
+    steam_appid: 1030300
+    release_date: 2025-09-04
+    release_status: released
+    developers: [team-cherry]
+    publishers: [team-cherry]
+    tags: [metroidvania, action-adventure, platformer, atmospheric]
+    tagline: "Hornet's faster, sharper journey through a hostile new kingdom."
+    editorial_score: 93
+    gem_note: >-
+      Silksong trades Hollow Knight's weight for Hornet's speed and aggression.
+      The new kingdom is denser and more vertical, with tools and quests that
+      expand the formula. A worthy, long-awaited follow-up.
+    store_links:
+      steam: https://store.steampowered.com/app/1030300/
+      gog: https://www.gog.com/en/game/hollow_knight_silksong
+      humble: https://www.humblebundle.com/store/hollow-knight-silksong
+  # Recent / upcoming
+  - slug: valheim
+    title: Valheim
+    steam_appid: 892970
+    igdb_slug: valheim  # slug from PCGamingWiki infobox (igdb.com is Cloudflare-blocked)
+    release_date: 2026-09-09
+    release_status: released
+    developers: [iron-gate]
+    publishers: [coffee-stain-publishing]
+    tags: [survival, crafting, base-building, co-op, open-world]
+    tagline: "Build, sail and fight through a viking afterlife, with friends."
+    editorial_score: 91
+    gem_note: >-
+      Valheim's 1.0 release caps years of early access with a survival sandbox
+      that rewards exploration and teamwork. Its low-fi look belies deep building
+      and combat. Best played co-op, one longship at a time.
+    store_links:
+      steam: https://store.steampowered.com/app/892970/
+      humble: https://www.humblebundle.com/store/valheim
+  - slug: how-to-fish
+    title: How to Fish
+    steam_appid: 4001890
+    igdb_slug: how-to-fish  # slug from PCGamingWiki infobox (igdb.com is Cloudflare-blocked)
+    release_date: 2026-08-20
+    release_status: released
+    developers: [dazed-games]
+    publishers: [dazed-games]
+    tags: [fishing, cozy, simulation, exploration]
+    tagline: "Cast a line, drift between islands, and take it slow."
+    editorial_score: 89
+    gem_note: >-
+      How to Fish is a quiet, generous fishing game with secrets hidden under
+      calm waters. Its relaxed pace and gentle progression made it an instant
+      word-of-mouth hit. The rare cozy game that still respects your time.
+    store_links:
+      steam: https://store.steampowered.com/app/4001890/
+  - slug: tcg-card-shop-simulator
+    title: TCG Card Shop Simulator
+    steam_appid: 3070070
+    igdb_slug: tcg-card-shop-simulator  # slug from PCGamingWiki infobox (igdb.com is Cloudflare-blocked)
+    release_date: 2026-09-14
+    release_status: released
+    developers: [opneon-games]
+    publishers: [opneon-games]
+    tags: [simulation, management, card-game]
+    tagline: "Run a trading-card shop, from singles to sealed boxes."
+    editorial_score: 84
+    gem_note: >-
+      This 1.0 launch turns retail logistics into a surprisingly engrossing loop
+      of pricing, restocking and chasing rare pulls. There is real satisfaction
+      in watching a scruffy store grow. A must for card-collecting sim fans.
+    store_links:
+      steam: https://store.steampowered.com/app/3070070/
+      itch: https://opneongames.itch.io/tcg-card-shop-simulator  # verified via PCGamingWiki
+  - slug: big-ambitions
+    title: Big Ambitions
+    steam_appid: 1331550
+    release_date: 2026-08-28
+    release_status: released
+    developers: [hovgaard-games]
+    publishers: [hovgaard-games]
+    tags: [simulation, management, strategy]
+    tagline: "Start with nothing and build a business empire, block by block."
+    editorial_score: 84
+    gem_note: >-
+      Big Ambitions scales from a single corner shop to a city-spanning company.
+      Its mix of trading, staffing and logistics rewards planning without
+      drowning you in spreadsheets. Out of early access, it is a tidy tycoon
+      sandbox.
+    store_links:
+      steam: https://store.steampowered.com/app/1331550/
+  - slug: toem-2
+    title: TOEM 2
+    steam_appid: 2900640
+    release_date: 2026-09-29
+    release_status: released
+    developers: [something-we-made]
+    publishers: [something-we-made]
+    tags: [adventure, photography, puzzle, cozy, exploration]
+    tagline: "Photograph your way through a charming hand-drawn world."
+    editorial_score: 87
+    gem_note: >-
+      TOEM 2 continues the series' gentle loop of snapping photos to solve
+      playful puzzles. Its black-and-white dioramas are full of small delights
+      and kind characters. A warm, inventive follow-up to a beloved favourite.
+    store_links:
+      steam: https://store.steampowered.com/app/2900640/
+  - slug: alchemy-factory
+    title: Alchemy Factory
+    steam_appid: 3669570
+    igdb_slug: alchemy-factory  # slug from PCGamingWiki infobox (igdb.com is Cloudflare-blocked)
+    release_date: 2026-09-07
+    release_status: released
+    developers: [d5-copperhead]
+    publishers: [d5-copperhead]
+    tags: [automation, simulation, management]
+    tagline: "Automate a workshop of potions, pipes and conveyor chaos."
+    editorial_score: 86
+    gem_note: >-
+      Alchemy Factory turns potion-brewing into a satisfying web of belts,
+      machines and recipes. Its launch already offers deep building and steady
+      optimisation. A treat for automation fans wanting a fresh theme.
+    store_links:
+      steam: https://store.steampowered.com/app/3669570/

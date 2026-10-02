@@ -2,3 +2,82 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 @source "./view/**/*.templ";
+
+/* ---------------------------------------------------------------------------
+   Design tokens — "Amethyst night" gem theme.
+   Deep violet-tinted dark surfaces, one vivid amethyst accent, brass for
+   score highlights. Fonts are self-hosted (public/fonts, @font-face below).
+--------------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Surfaces: near-black with a violet undertone */
+  --color-night-950: #0f0d17;
+  --color-night-900: #16131f;
+  --color-night-800: #1e1a2c;
+  --color-night-700: #2a2440;
+
+  /* The gem: vivid amethyst accent */
+  --color-gem-300: #d5b0ff;
+  --color-gem-400: #bf8bff;
+  --color-gem-500: #a55eff;
+  --color-gem-600: #8b3fe6;
+  --color-gem-700: #6f2cbf;
+
+  /* Brass: gem score + small highlights */
+  --color-brass-400: #e8c268;
+  --color-brass-500: #d9a83f;
+}
+
+/* Self-hosted fonts (woff2, latin subset) — no font CDN. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/public/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/public/fonts/inter-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* Centered page container; lives on sections/main, never on <body>, so
+   full-width hero bands stay possible. */
+@utility container-site {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 76rem;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Hide scrollbars on horizontal snap carousels (scrollbar width still works) */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Rendered markdown blocks (third-party descriptions, notes, bios). */
+.prose-gem {
+  @apply prose prose-invert max-w-none;
+  --tw-prose-body: #d6d3e0;
+  --tw-prose-headings: #ffffff;
+  --tw-prose-bold: #ffffff;
+  --tw-prose-links: #bf8bff;
+  --tw-prose-quotes: #d6d3e0;
+  --tw-prose-quote-borders: #a55eff;
+  --tw-prose-hr: #2a2440;
+  --tw-prose-th-borders: #2a2440;
+  --tw-prose-td-borders: #1e1a2c;
+  --tw-prose-code: #d5b0ff;
+}

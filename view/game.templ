@@ -1,0 +1,284 @@
+package view
+
+import (
+	"context"
+	"io"
+
+	"github.com/embiem/indie-game-gems/data"
+	"github.com/embiem/indie-game-gems/util"
+)
+
+// jsonLDScript renders a JSON-LD <script> block. templ parses <script>
+// children as raw text, so the tag is written manually; templ.JSONString
+// escapes everything that could break out of the script context.
+func jsonLDScript(v any) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		s, err := templ.JSONString(v)
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(w, `<script type="application/ld+json">`+s+`</script>`)
+		return err
+	})
+}
+
+// developersOnly filters the game's companies to the developer role.
+func developersOnly(d GamePageData) []data.ListGameDevelopersRow {
+	var out []data.ListGameDevelopersRow
+	for _, dev := range d.Developers {
+		if dev.Role == "developer" {
+			out = append(out, dev)
+		}
+	}
+	return out
+}
+
+// Long third-party descriptions collapse everything after the first
+// paragraphs into a <details> block.
+const descriptionKeepParas = 2
+
+func descriptionIntro(md string) string {
+	intro, _ := util.DescriptionPreview(md, descriptionKeepParas)
+	return intro
+}
+
+func descriptionRest(md string) string {
+	_, rest := util.DescriptionPreview(md, descriptionKeepParas)
+	return rest
+}
+
+templ GamePage(d GamePageData) {
+	@Layout(d.Meta) {
+		<section class="relative overflow-hidden border-b border-white/5">
+			<div class="absolute inset-0" aria-hidden="true">
+				if d.HeroURL != "" {
+					<img
+						src={ d.HeroURL }
+						alt=""
+						width="920"
+						height="430"
+						fetchpriority="high"
+						class="h-full w-full scale-105 object-cover"
+					/>
+				} else {
+					<div class="h-full w-full" style={ TileGradient(d.Game.Slug) }></div>
+				}
+				<div class="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/60 to-night-950/20"></div>
+				<div class="absolute inset-0 bg-gradient-to-r from-night-950/80 via-night-950/25 to-transparent"></div>
+			</div>
+
+			<div class="container-site relative pt-16 pb-12 sm:pt-24 sm:pb-16">
+				<div class="flex items-start justify-between gap-6">
+					<div class="max-w-3xl">
+						<p class="text-xs font-semibold tracking-widest text-gem-300 uppercase">Indie gem</p>
+						<h1 class="mt-2 font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">{ d.Game.Title }</h1>
+						if d.Game.Tagline != "" {
+							<p class="mt-3 text-lg text-zinc-300 sm:text-xl">{ d.Game.Tagline }</p>
+						}
+						<div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+							<span class="inline-flex items-center gap-1.5 rounded-full bg-white/8 px-2.5 py-1 text-xs font-medium text-zinc-200 ring-1 ring-white/10 ring-inset">
+								{ ReleaseBadgeText(d.Game.ReleaseStatus, d.Game.ReleaseDate) }
+							</span>
+							for _, dev := range d.Developers {
+								<a href={ "/developers/" + dev.Slug } class="text-zinc-300 transition hover:text-gem-300">
+									<span class="text-zinc-500">{ roleLabel(dev.Role) }</span>
+									<span class="font-medium">{ dev.Name }</span>
+								</a>
+							}
+						</div>
+					</div>
+					<div class="hidden shrink-0 pt-2 sm:block">
+						@GemScoreBadge(d.Game.GemScore.Float32, d.Game.GemScore.Valid)
+					</div>
+				</div>
+
+				<div class="mt-8">
+					@StoreButtonsBar(d.Stores, "lg")
+				</div>
+			</div>
+		</section>
+
+		if len(d.Screenshots) > 0 {
+			<section class="container-site mt-10" aria-label="Screenshots">
+				<div class="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto rounded-2xl px-4 sm:mx-0 sm:px-0">
+					for i, shot := range d.Screenshots {
+						<img
+							src={ MediaURL(shot.Key) }
+							alt={ d.Game.Title + " screenshot" }
+							width="1280"
+							height="720"
+							loading={ screenshotLoading(i) }
+							decoding="async"
+							class="aspect-video w-[85vw] max-w-140 shrink-0 snap-center rounded-xl object-cover ring-1 ring-white/10"
+						/>
+					}
+				</div>
+			</section>
+		}
+
+		if d.TrailerID != "" {
+			<section class="container-site mt-10" aria-label="Trailer">
+				<div
+					data-youtube-id={ d.TrailerID }
+					data-youtube-title={ d.Game.Title + " trailer" }
+					class="group relative aspect-video w-full overflow-hidden rounded-2xl bg-night-900 ring-1 ring-white/10"
+				>
+					<button
+						type="button"
+						data-youtube-play
+						class="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center"
+						aria-label={ "Play the " + d.Game.Title + " trailer (loads YouTube)" }
+					>
+						if d.TrailerURL != "" {
+							<img
+								src={ d.TrailerURL }
+								alt=""
+								width="1280"
+								height="720"
+								loading="lazy"
+								decoding="async"
+								class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+							/>
+						} else {
+							<div class="h-full w-full" style={ TileGradient(d.Game.Slug + ":trailer") }></div>
+						}
+						<span class="absolute inset-0 bg-night-950/25 transition group-hover:bg-night-950/10" aria-hidden="true"></span>
+						<span class="absolute flex h-16 w-16 items-center justify-center rounded-full bg-night-950/70 text-white ring-1 ring-white/40 transition group-hover:scale-105 group-hover:bg-gem-600/90" aria-hidden="true">
+							<svg viewBox="0 0 24 24" class="ml-1 h-7 w-7" fill="currentColor"><path d="M8 5.5v13l11-6.5Z"></path></svg>
+						</span>
+					</button>
+				</div>
+			</section>
+		}
+
+		<article class="container-site mt-12">
+			<div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+				<div class="min-w-0 space-y-10">
+					if d.Game.GemNoteMd != "" {
+						<section aria-labelledby="gemnote-h">
+							<div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gem-700/50 via-night-800 to-night-900 p-6 ring-1 ring-gem-500/25 sm:p-8">
+								<div class="pointer-events-none absolute -top-14 -right-10 h-40 w-40 rounded-full bg-gem-500/20 blur-3xl" aria-hidden="true"></div>
+								<h2 id="gemnote-h" class="relative flex items-center gap-2.5 font-display text-2xl font-bold text-white">
+									@GemMark("h-6 w-6")
+									Why it's a gem
+								</h2>
+								<div class="prose-gem relative mt-4">
+									@templ.Raw(util.MdToHTML(d.Game.GemNoteMd))
+								</div>
+							</div>
+						</section>
+					}
+					if d.Game.DescriptionMd != "" {
+						<section aria-labelledby="about-h">
+							<h2 id="about-h" class="font-display text-2xl font-bold text-white">About</h2>
+							<div class="prose-gem mt-4">
+								@templ.Raw(util.MdToHTML(descriptionIntro(d.Game.DescriptionMd)))
+								if descriptionRest(d.Game.DescriptionMd) != "" {
+									<details class="group mt-4">
+										<summary class="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-gem-300 transition hover:text-gem-400 [&::-webkit-details-marker]:hidden">
+											<span class="group-open:hidden">Read the full description ↓</span>
+											<span class="hidden group-open:inline">Show less ↑</span>
+										</summary>
+										<div class="mt-4">
+											@templ.Raw(util.MdToHTML(descriptionRest(d.Game.DescriptionMd)))
+										</div>
+									</details>
+								}
+							</div>
+						</section>
+					}
+				</div>
+
+				<aside class="space-y-6">
+					<div class="rounded-2xl bg-night-900/70 p-5 ring-1 ring-white/10">
+						<h2 class="font-display text-sm font-semibold tracking-widest text-zinc-500 uppercase">Details</h2>
+						<dl class="mt-4 space-y-3 text-sm">
+							<div class="flex justify-between gap-4">
+								<dt class="shrink-0 text-zinc-500">Release</dt>
+								<dd class="text-right font-medium text-zinc-200">{ ReleaseBadgeText(d.Game.ReleaseStatus, d.Game.ReleaseDate) }</dd>
+							</div>
+							if d.Game.GemScore.Valid {
+								<div class="flex justify-between gap-4">
+									<dt class="shrink-0 text-zinc-500">Gem score</dt>
+									<dd class="flex items-center gap-2 font-medium text-zinc-200">
+										{ GemScoreLabel(d.Game.GemScore) }
+										<span class="text-xs text-zinc-500">/ 100</span>
+									</dd>
+								</div>
+							}
+							if len(d.Developers) > 0 {
+								<div class="flex justify-between gap-4">
+									<dt class="shrink-0 text-zinc-500">Developer</dt>
+									<dd class="text-right">
+										for i, dev := range developersOnly(d) {
+											if i > 0 {
+												<span>, </span>
+											}
+											<a href={ "/developers/" + dev.Slug } class="font-medium text-zinc-200 transition hover:text-gem-300">{ dev.Name }</a>
+										}
+									</dd>
+								</div>
+							}
+							if d.Game.WebsiteUrl != "" {
+								<div class="flex justify-between gap-4">
+									<dt class="shrink-0 text-zinc-500">Website</dt>
+									<dd class="text-right">
+										<a href={ d.Game.WebsiteUrl } target="_blank" rel="noopener" class="font-medium text-gem-300 hover:text-gem-400">Official site ↗</a>
+									</dd>
+								</div>
+							}
+						</dl>
+					</div>
+					if len(d.Tags) > 0 {
+						<div class="rounded-2xl bg-night-900/70 p-5 ring-1 ring-white/10">
+							<h2 class="font-display text-sm font-semibold tracking-widest text-zinc-500 uppercase">Tags</h2>
+							<div class="mt-4 flex flex-wrap gap-2">
+								for _, tag := range d.Tags {
+									@TagPill(tag.Slug, tag.Name)
+								}
+							</div>
+						</div>
+					}
+				</aside>
+			</div>
+		</article>
+
+		if len(d.MoreFrom) > 0 {
+			<section class="container-site mt-16" aria-labelledby="more-h">
+				@SectionHeader("", "More from "+d.MoreFromDev, "/developers/"+moreFromSlug(d), "All games")
+				@GameCardGrid(d.MoreFrom)
+			</section>
+		}
+
+		if d.JSONLD != nil {
+			// templ treats <script> children as raw text, so the JSON-LD
+			// block is emitted via templ.Raw; templ.JSONString escapes
+			// everything that could break out of the script context.
+			@jsonLDScript(d.JSONLD)
+		}
+	}
+}
+
+func roleLabel(role string) string {
+	if role == "publisher" {
+		return "published by"
+	}
+	return "by"
+}
+
+func screenshotLoading(i int) string {
+	if i == 0 {
+		return "eager"
+	}
+	return "lazy"
+}
+
+// moreFromSlug returns the primary developer slug for the "All games" link.
+func moreFromSlug(d GamePageData) string {
+	for _, dev := range d.Developers {
+		if dev.Role == "developer" {
+			return dev.Slug
+		}
+	}
+	return ""
+}

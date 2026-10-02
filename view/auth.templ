@@ -7,45 +7,59 @@ type SignupInputErrors struct {
 }
 
 templ SignupPage() {
-	@Layout() {
-		<div>
-			<h1>Signup</h1>
+	@Layout(PageMeta{
+		Title:       "Sign up",
+		Description: "Create an Indie Game Gems account.",
+		Canonical:   "/signup",
+		NoIndex:     true,
+	}) {
+		@AuthCard("Create your account", "Keep track of the gems you don't want to miss.") {
 			@SignupForm(SignupInputErrors{})
-		</div>
+		}
 	}
 }
 
 templ SignupForm(errors SignupInputErrors) {
-	<form hx-post="/signup" hx-swap="outerHTML">
-		<input
-			name="username"
-			type="text"
-			placeholder="Your username"
-			value={ errors.PreviousName }
-			autocomplete="username"
-			maxlength="64"
-			required
-		/>
-		if errors.NameError != "" {
-			<div class="text-red-500">{ errors.NameError }</div>
-		}
-		<input
-			name="password"
-			type="password"
-			placeholder="Your password"
-			autocomplete="new-password"
-			minlength="8"
-			maxlength="72"
-			required
-		/>
-		if errors.PasswordError != "" {
-			<div class="text-red-500">{ errors.PasswordError }</div>
-		}
+	<form hx-post="/signup" hx-swap="outerHTML" class="space-y-4">
+		<div>
+			<label for="signup-username" class="mb-1.5 block text-sm font-medium text-zinc-300">Username</label>
+			<input
+				id="signup-username"
+				name="username"
+				type="text"
+				placeholder="Your username"
+				value={ errors.PreviousName }
+				autocomplete="username"
+				maxlength="64"
+				required
+				class="block w-full rounded-xl border-0 bg-white/5 px-3.5 py-2.5 text-white ring-1 ring-white/15 ring-inset placeholder:text-zinc-600 focus:ring-2 focus:ring-gem-500"
+			/>
+			if errors.NameError != "" {
+				<p class="mt-1.5 text-sm text-red-400" role="alert">{ errors.NameError }</p>
+			}
+		</div>
+		<div>
+			<label for="signup-password" class="mb-1.5 block text-sm font-medium text-zinc-300">Password</label>
+			<input
+				id="signup-password"
+				name="password"
+				type="password"
+				placeholder="Your password"
+				autocomplete="new-password"
+				minlength="8"
+				maxlength="72"
+				required
+				class="block w-full rounded-xl border-0 bg-white/5 px-3.5 py-2.5 text-white ring-1 ring-white/15 ring-inset placeholder:text-zinc-600 focus:ring-2 focus:ring-gem-500"
+			/>
+			if errors.PasswordError != "" {
+				<p class="mt-1.5 text-sm text-red-400" role="alert">{ errors.PasswordError }</p>
+			}
+		</div>
 		<div class="hidden">
 			<input name="organization" type="text" placeholder="Your organization" tabindex="-1" autocomplete="off"/>
 		</div>
-		@Button(ButtonProps{Type: "submit"}) {
-			Signup 
+		@Button(ButtonProps{Type: "submit", Class: "w-full"}) {
+			Create account
 		}
 	</form>
 }
@@ -60,56 +74,85 @@ type LoginInputErrors struct {
 }
 
 templ LoginPage() {
-	@Layout() {
-		<div>
-			<h1>Login</h1>
-			<p>Don't have an account yet? <a href="/signup">Sign-up!</a></p>
+	@Layout(PageMeta{
+		Title:       "Log in",
+		Description: "Log in to Indie Game Gems.",
+		Canonical:   "/login",
+		NoIndex:     true,
+	}) {
+		@AuthCard("Welcome back", "Log in to keep your gem collection close.") {
 			@LoginForm(LoginInputErrors{})
-		</div>
+		}
 	}
 }
 
 templ LoginForm(errors LoginInputErrors) {
-	<form hx-post="/login" hx-swap="outerHTML">
-		<input
-			name="username"
-			type="text"
-			placeholder="Your username"
-			value={ errors.PreviousName }
-			autocomplete="username"
-			maxlength="64"
-			required
-		/>
-		if errors.NameError != "" {
-			<div class="text-red-500">{ errors.NameError }</div>
-		}
-		<input
-			name="password"
-			type="password"
-			placeholder="Your password"
-			autocomplete="current-password"
-			maxlength="72"
-			required
-		/>
-		if errors.PasswordError != "" {
-			<div class="text-red-500">{ errors.PasswordError }</div>
-		}
-		if errors.FormError != "" {
-			<div class="text-red-500">{ errors.FormError }</div>
-		}
+	<form hx-post="/login" hx-swap="outerHTML" class="space-y-4">
+		<div>
+			<label for="login-username" class="mb-1.5 block text-sm font-medium text-zinc-300">Username</label>
+			<input
+				id="login-username"
+				name="username"
+				type="text"
+				placeholder="Your username"
+				value={ errors.PreviousName }
+				autocomplete="username"
+				maxlength="64"
+				required
+				class="block w-full rounded-xl border-0 bg-white/5 px-3.5 py-2.5 text-white ring-1 ring-white/15 ring-inset placeholder:text-zinc-600 focus:ring-2 focus:ring-gem-500"
+			/>
+			if errors.NameError != "" {
+				<p class="mt-1.5 text-sm text-red-400" role="alert">{ errors.NameError }</p>
+			}
+		</div>
+		<div>
+			<label for="login-password" class="mb-1.5 block text-sm font-medium text-zinc-300">Password</label>
+			<input
+				id="login-password"
+				name="password"
+				type="password"
+				placeholder="Your password"
+				autocomplete="current-password"
+				maxlength="72"
+				required
+				class="block w-full rounded-xl border-0 bg-white/5 px-3.5 py-2.5 text-white ring-1 ring-white/15 ring-inset placeholder:text-zinc-600 focus:ring-2 focus:ring-gem-500"
+			/>
+			if errors.PasswordError != "" {
+				<p class="mt-1.5 text-sm text-red-400" role="alert">{ errors.PasswordError }</p>
+			}
+			if errors.FormError != "" {
+				<p class="mt-1.5 text-sm text-red-400" role="alert">{ errors.FormError }</p>
+			}
+		</div>
 		<div class="hidden">
 			<input name="organization" type="text" placeholder="Your organization" tabindex="-1" autocomplete="off"/>
 		</div>
-		@Button(ButtonProps{Type: "submit"}) {
-			Login 
+		@Button(ButtonProps{Type: "submit", Class: "w-full"}) {
+			Log in
 		}
 	</form>
 }
 
 templ LogoutForm() {
 	<form action="/logout" method="post">
-		@Button(ButtonProps{Type: "submit"}) {
-			Logout 
+		@Button(ButtonProps{Type: "submit", Variant: "ghost"}) {
+			Logout
 		}
 	</form>
+}
+
+// AuthCard is the centered panel both auth pages render their form into.
+templ AuthCard(title, subtitle string) {
+	<section class="container-site flex justify-center py-16 sm:py-24">
+		<div class="w-full max-w-sm">
+			<div class="mb-6 flex flex-col items-center text-center">
+				@GemMark("h-10 w-10")
+				<h1 class="mt-4 font-display text-2xl font-bold text-white">{ title }</h1>
+				<p class="mt-1 text-sm text-zinc-500">{ subtitle }</p>
+			</div>
+			<div class="rounded-2xl bg-night-900/80 p-6 ring-1 ring-white/10">
+				{ children... }
+			</div>
+		</div>
+	</section>
 }

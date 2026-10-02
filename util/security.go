@@ -5,12 +5,16 @@ import (
 	"strings"
 )
 
-// csp matches what view/layout.templ actually loads: local CSS/assets plus the
-// htmx bundles from unpkg. Tighten script-src once htmx is vendored locally.
+// csp matches what view/layout.templ actually loads: everything, including
+// htmx and the trailer loader, is served same-origin from /public. The only
+// third-party sink is the click-to-load YouTube trailer facade
+// (youtube-nocookie iframes); img/style/font stay same-origin (data: lets
+// small inline icons through).
 const csp = "default-src 'self'; " +
-	"script-src 'self' https://unpkg.com; " +
+	"script-src 'self'; " +
 	"style-src 'self'; " +
 	"img-src 'self' data:; " +
+	"frame-src https://www.youtube-nocookie.com; " +
 	"base-uri 'none'; " +
 	"form-action 'self'; " +
 	"frame-ancestors 'none'"

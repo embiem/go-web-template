@@ -18,10 +18,145 @@ type Account struct {
 	UpdatedAt    pgtype.Timestamp
 }
 
+type DailyPick struct {
+	PickDate  pgtype.Date
+	GameID    pgtype.UUID
+	NoteMd    string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+type Delivery struct {
+	ID           pgtype.UUID
+	IssueID      pgtype.UUID
+	SubscriberID pgtype.UUID
+	Status       string
+	ClaimedAt    pgtype.Timestamptz
+	Attempts     int16
+	LastError    string
+	SentAt       pgtype.Timestamptz
+	CreatedAt    pgtype.Timestamptz
+}
+
+type Developer struct {
+	ID             pgtype.UUID
+	Slug           string
+	Name           string
+	BioMd          string
+	WebsiteUrl     string
+	LogoKey        string
+	Socials        []byte
+	IgdbID         pgtype.Int8
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+	LastIgdbSyncAt pgtype.Timestamptz
+}
+
+type Game struct {
+	ID               pgtype.UUID
+	Slug             string
+	Title            string
+	Tagline          string
+	DescriptionMd    string
+	GemNoteMd        string
+	ReleaseDate      pgtype.Date
+	ReleaseStatus    string
+	SteamAppid       pgtype.Int8
+	IgdbID           pgtype.Int8
+	WebsiteUrl       string
+	SteamReviewPct   pgtype.Int2
+	SteamReviewCount int64
+	EditorialScore   pgtype.Int2
+	GemScore         pgtype.Float4
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+	TrailerYoutubeID pgtype.Text
+	LastSteamSyncAt  pgtype.Timestamptz
+	LastIgdbSyncAt   pgtype.Timestamptz
+}
+
+type GameCard struct {
+	ID            pgtype.UUID
+	Slug          string
+	Title         string
+	Tagline       string
+	ReleaseDate   pgtype.Date
+	ReleaseStatus string
+	GemScore      pgtype.Float4
+	DeveloperName string
+	DeveloperSlug string
+	MediaKey      string
+}
+
+type GameDeveloper struct {
+	GameID      pgtype.UUID
+	DeveloperID pgtype.UUID
+	Role        string
+}
+
+type GameTag struct {
+	GameID pgtype.UUID
+	TagID  pgtype.UUID
+}
+
+type Issue struct {
+	ID        pgtype.UUID
+	Slug      string
+	Subject   string
+	Preheader string
+	SourceMd  string
+	Html      string
+	Text      string
+	Status    string
+	SentAt    pgtype.Timestamptz
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
+type Medium struct {
+	ID        pgtype.UUID
+	GameID    pgtype.UUID
+	Kind      string
+	Key       string
+	SourceUrl string
+	Position  int16
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
 type Session struct {
 	Token  string
 	Data   []byte
 	Expiry pgtype.Timestamptz
+}
+
+type StoreLink struct {
+	GameID    pgtype.UUID
+	Store     string
+	Url       string
+	SourceUrl string
+	UpdatedAt pgtype.Timestamptz
+}
+
+type Subscriber struct {
+	ID                    pgtype.UUID
+	Email                 string
+	Status                string
+	ConfirmationTokenHash pgtype.Text
+	ConfirmationExpiresAt pgtype.Timestamptz
+	Source                string
+	CreatedAt             pgtype.Timestamptz
+	ConfirmedAt           pgtype.Timestamptz
+	UnsubscribedAt        pgtype.Timestamptz
+	UpdatedAt             pgtype.Timestamptz
+}
+
+type Tag struct {
+	ID        pgtype.UUID
+	Slug      string
+	Name      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type User struct {

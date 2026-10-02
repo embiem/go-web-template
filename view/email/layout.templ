@@ -1,0 +1,97 @@
+package email
+
+// Page renders the full newsletter email as email-client-safe HTML: table
+// layout, inline styles only, ~600px wide, readable with images blocked and
+// in forced dark mode (no pure black/white, color-scheme meta declared).
+//
+// The plain-text alternative is generated from the same Doc by Text; keep
+// content mirrored between the two.
+templ Page(doc Doc) {
+	<!DOCTYPE html>
+	<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<meta name="color-scheme" content="light dark"/>
+			<meta name="supported-color-schemes" content="light dark"/>
+			<title>{ doc.Subject }</title>
+		</head>
+		<body style="margin:0;padding:0;background-color:#efe9df;color:#2b2622;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.5;">
+			if doc.Preheader != "" {
+				<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">{ doc.Preheader }</div>
+			}
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#efe9df;">
+				<tr>
+					<td align="center" style="padding:24px 12px;">
+						<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="container" style="width:100%;max-width:600px;background-color:#fdfaf3;border:1px solid #e3d9c6;border-radius:16px;overflow:hidden;">
+							<tr>
+								<td style="padding:28px 24px 8px 24px;">
+									@wordmark(doc.Footer.HomeURL)
+								</td>
+							</tr>
+							for _, b := range doc.Blocks {
+								<tr>
+									<td style="padding:8px 24px;">
+										@block(b)
+									</td>
+								</tr>
+							}
+							<tr>
+								<td style="padding:16px 24px 28px 24px;">
+									@footer(doc.Footer)
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</body>
+	</html>
+}
+
+templ wordmark(homeURL string) {
+	if homeURL != "" {
+		<a href={ templ.URL(homeURL) } style="color:#6f2cbf;text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;">&#9670; Indie Game Gems</a>
+	} else {
+		<span style="color:#6f2cbf;font-size:20px;font-weight:700;letter-spacing:-0.02em;">&#9670; Indie Game Gems</span>
+	}
+}
+
+templ block(b Block) {
+	if b.ProseHTML != "" {
+		<div style="color:#2b2622;font-size:15px;">@templ.Raw(b.ProseHTML)</div>
+	}
+	if b.Gotd != nil {
+		@gotdBlock(b.Gotd)
+	}
+	if b.Radar != nil {
+		@sectionBlock(b.Radar, false)
+	}
+	if b.Top != nil {
+		@sectionBlock(b.Top, true)
+	}
+	if b.Game != nil {
+		@gameCardBlock(b.Game)
+	}
+}
+
+templ footer(f Footer) {
+	<div style="border-top:1px solid #e3d9c6;padding-top:16px;color:#6f675c;font-size:12px;line-height:1.6;">
+		if f.BrowserURL != "" {
+			<p style="margin:0 0 10px 0;">
+				<a href={ templ.URL(f.BrowserURL) } style="color:#8b3fe6;">Read this issue in the browser</a>
+			</p>
+		}
+		if f.Reason != "" {
+			<p style="margin:0 0 10px 0;">{ f.Reason }</p>
+		}
+		if f.PostalAddress != "" {
+			<p style="margin:0 0 10px 0;">Indie Game Gems &#183; { f.PostalAddress }</p>
+		}
+		if f.UnsubURL != "" {
+			<p style="margin:0;">
+				<a href={ templ.URL(f.UnsubURL) } style="color:#6f675c;">Unsubscribe</a>
+			</p>
+		}
+	</div>
+}

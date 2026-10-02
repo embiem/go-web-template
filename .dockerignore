@@ -4,4 +4,15 @@ tmp/
 .env.*
 !.env.example
 *.md
+# Newsletter issue/template markdown is needed inside the image (gems CLI
+# scaffolding/preview sources).
+!newsletter/templates/*.md
+!newsletter/issues/*.md
 .air.toml
+media/
+Dockerfile
+docker-compose.yml
+/gems
+/server
+/indie-game-gems
+build-errors.log

@@ -1,0 +1,41 @@
+# Phase-1 smoke fixture (mirrors the curator seed format).
+developers:
+  - slug: supergiant-games
+    name: Supergiant Games
+    website_url: https://www.supergiantgames.com
+    bio: >-
+      American studio behind Bastion, Transistor, Pyre and Hades.
+    socials: {x: "https://x.com/supergiantgames", youtube: "https://www.youtube.com/@supergiantgames"}
+  - slug: team-cherry
+    name: Team Cherry
+    website_url: https://teamcherry.com.au
+    bio: >-
+      Three-person Australian studio behind Hollow Knight.
+games:
+  - slug: hades
+    title: Hades
+    steam_appid: 1145360
+    igdb_slug: hades--1
+    release_date: 2020-09-17
+    release_status: released
+    developers: [supergiant-games]
+    publishers: [supergiant-games]
+    tags: [roguelike, action]
+    tagline: "Defy the god of the dead."
+    description: >-
+      Rogue-like dungeon crawler where you escape the underworld.
+    editorial_score: 95
+    gem_note: >-
+      A masterclass in run-based storytelling.
+    store_links: {steam: "https://store.steampowered.com/app/1145360", epic: "https://store.epicgames.com/p/hades", direct: "https://www.supergiantgames.com/games/hades"}
+  - slug: hollow-knight
+    title: Hollow Knight
+    release_date: 2017-02-24
+    release_status: released
+    developers: [team-cherry]
+    tags: [metroidvania, platformer]
+    tagline: "Descend into the Hallownest."
+    editorial_score: 92
+    gem_note: >-
+      Vast, haunting, and impossibly polished.
+    store_links: {steam: "https://store.steampowered.com/app/367520", gog: "https://www.gog.com/en/game/hollow_knight"}
